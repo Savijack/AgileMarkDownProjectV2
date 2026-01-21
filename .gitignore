@@ -1,0 +1,17 @@
+# Build output
+program
+main
+*.o
+*.out
+
+# CLion
+.idea/
+cmake-build-*/
+
+# Visual Studio
+.vs/
+*.vcxproj*
+*.sln
+
+# macOS
+.DS_Store
