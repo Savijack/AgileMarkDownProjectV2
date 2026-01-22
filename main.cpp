@@ -1,29 +1,25 @@
 #include <iostream>
+#include <filesystem>
 #define CATCH_CONFIG_NO_POSIX_SIGNALS
 #define CATCH_CONFIG_MAIN   
 #include "catch.hpp"
 #include "HTMLConverter.h"
-#include <iostream>
 
 using namespace std;
 
-int main()
-{
-   HTMLConverter *test = new HTMLConverter("./test_documents/1.md");
-   test->convert("output.html");
-   delete test;
-}
-
 //--
-TEST_CASE("File Conversion")  
-{ 
-	SECTION("")
+TEST_CASE("Check creating output file")  
+{
+	HTMLConverter *test = new HTMLConverter("./test_documents/1.md");
+	SECTION("Test Document 1")
 	{
-		REQUIRE(10 == 10);
+		test->convert("output.html");
+		REQUIRE(filesystem::exists("./output.html"));
 	}
 
 	SECTION("")
 	{
 		REQUIRE(10 == 10);
 	}
+	delete test;
 }

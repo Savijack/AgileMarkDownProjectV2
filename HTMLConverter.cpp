@@ -1,6 +1,6 @@
 #include "HTMLConverter.h"
 
-HTMLConverter::HTMLConverter(const std::string &filepath)
+HTMLConverter::HTMLConverter(const string &filepath)
 {
    ifstream file(filepath);
    string line;
@@ -15,7 +15,7 @@ HTMLConverter::HTMLConverter(const std::string &filepath)
    }
 
    file.close();
-   for (int i = 0; i < lines.size(); i++)
+   for (size_t i = 0; i < lines.size(); i++)
    {
        cout << lines[i] << endl;
    }
@@ -41,7 +41,7 @@ void HTMLConverter::convert(const string& outputFilepath)
     outputFile << "<html>\n";
     outputFile << "<body>\n";
 
-    for(int i = 0; i < output.size(); i++)
+    for(size_t i = 0; i < output.size(); i++)
     {
         outputFile << output[i];
     }
