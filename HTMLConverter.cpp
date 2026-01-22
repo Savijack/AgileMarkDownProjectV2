@@ -39,6 +39,10 @@ void HTMLConverter::convert(const string& outputFilepath)
         if (hasImage(line)) {
             handleImage(line);
         }
+        if (hasLink(line)) {
+            handleLink(line);
+        }
+        output.push_back(line);
     }
 
     ofstream outputFile;
@@ -61,7 +65,7 @@ void HTMLConverter::convert(const string& outputFilepath)
 
     for(size_t i = 0; i < output.size(); i++)
     {
-        outputFile << output[i];
+        outputFile << output[i] << endl;
     }
 
     outputFile << "</body>\n";
@@ -164,5 +168,9 @@ void HTMLConverter::handleImage(string& line) {
     line = regex_replace(line, pattern, replacement_string);
 }
 void HTMLConverter::handleLink(string& line) {
-    
+    const regex pattern(R"(((^|[^!])\[([^\]]+)\]\(([^)]+)\)))");
+    smatch m;
+    regex_search(line, m, pattern);
+    string replacement_string = "<a href=\"" + m[4].str() + "\">" + m[3].str() + "</a>";
+    line = regex_replace(line, pattern, replacement_string);
 }
