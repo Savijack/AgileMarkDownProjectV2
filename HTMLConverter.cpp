@@ -48,3 +48,8 @@ void HTMLConverter::convert(const string& outputFilepath)
 
     std::cout << "HTML file 'output.html' generated successfully." << std::endl;
 }
+//--
+void HTMLConverter::convertLine(string& line) {
+    static const regex pattern(R"(^\s*(---)\s*$)");
+    line = regex_replace(line, pattern, "<hr>");
+}

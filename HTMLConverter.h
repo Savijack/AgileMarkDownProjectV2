@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <regex>
 
 using namespace std;
 
@@ -13,6 +14,8 @@ public:
    void readMD(const string& filepath);
    void convert(const string& outputFilepath);
    void outputToFile();
+
+   void convertLine(string& s);
 
 private:
 
