@@ -10,7 +10,7 @@ using namespace std;
 //--
 TEST_CASE("Check creating output file")  
 {
-	HTMLConverter *test = new HTMLConverter("./test_documents/1.md");
+	HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
 	SECTION("Test Document 1")
 	{
 		test->convert("output.html");

@@ -23,6 +23,21 @@ HTMLConverter::HTMLConverter(const string &filepath)
 
 void HTMLConverter::convert(const string& outputFilepath)
 {
+    for (auto& line : lines) {
+        if (hasBoldAndItalics(line)) {
+            handleBoldAndItalics(line);
+        }
+        if (hasBold(line)) {
+            handleBold(line);
+        }
+        if (hasItalics(line)) {
+            handleItalics(line);
+        }
+        if (hasHeader(line)) {
+            handleHeader(line);
+        }
+    }
+
     ofstream outputFile;
     // Specify the filename with the .html extension
     outputFile.open(outputFilepath);
@@ -104,7 +119,7 @@ bool HTMLConverter::hasFilename(const string& line) {
 // 1-6 depending on the number of #'s
 // 0 if there's no #, or it's not in the correct position, or it's not followed by a space.
 int HTMLConverter::hasHeader(const string& line) {
-    int count = 0;
+    size_t count = 0; // size_t instead of int to dodge compiler warning
 
     while (count < line.size() and line[count] == '#') {
         count++;
@@ -115,4 +130,26 @@ int HTMLConverter::hasHeader(const string& line) {
         return count;
     }
     return 0;
+}
+
+void HTMLConverter::handleBoldAndItalics(string& line) {
+    static const regex pattern(R"(\*{3}(.*)\*{3})");
+    line = regex_replace(line, pattern, "<b><em>$1</em></b>");
+}
+void HTMLConverter::handleBold(string& line) {
+    static const regex pattern(R"(\*\*(.*?)\*\*)");
+    line = regex_replace(line, pattern, "<b>$1</b>");
+}
+void HTMLConverter::handleItalics(string& line) {
+    static const regex pattern(R"(\*(.*)\*)");
+    line = regex_replace(line, pattern, "<em>$1</em>");
+}
+void HTMLConverter::handleHeader(string& line) {
+    int num_headers = hasHeader(line);
+    if (num_headers < 1) return;
+    static const regex pattern(R"(^#+\s+(.*))");
+
+    line = "<h" + to_string(num_headers) + ">"
+        + regex_replace(line, pattern, "$1")
+        + "</h" + to_string(num_headers) + ">";
 }

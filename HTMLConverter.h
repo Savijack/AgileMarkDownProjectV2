@@ -34,4 +34,9 @@ private:
    bool hasFilename(const string& line);       // matches ``` filename=""
    int hasHeader(const string& line);          // returns number of #'s at the start of line, followed by space
 
+   // handlers
+   void handleBoldAndItalics(string& line);
+   void handleBold(string& line);
+   void handleItalics(string& line);
+   void handleHeader(string& line);
 };
