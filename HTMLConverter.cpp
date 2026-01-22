@@ -53,3 +53,26 @@ void HTMLConverter::convert(const string& outputFilepath)
 
     std::cout << "HTML file 'output.html' generated successfully." << std::endl;
 }
+
+string HTMLConverter::convertItalics(const string& line)
+{
+    string retVal = "";
+    bool inItalics = false;
+
+    for (int i = 0; i < line.length(); i++) {
+        if (line[i] == '*' && line[i+1] != '*' && line[i-1] != '*') {
+            if (inItalics) {
+                retVal += "</em>"; 
+            }
+            else {
+                retVal += "<em>";
+            }
+            inItalics = !inItalics; 
+        }
+        else {
+            retVal += line[i]; 
+        }
+    }
+
+    return retVal;
+}

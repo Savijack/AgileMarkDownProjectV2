@@ -13,6 +13,7 @@ public:
    void readMD(const string& filepath);
    void convert(const string& outputFilepath);
    void outputToFile();
+   string convertItalics(const string& line); 
 
 private:
 
