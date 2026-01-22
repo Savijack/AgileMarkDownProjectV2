@@ -35,8 +35,10 @@ private:
    int hasHeader(const string& line);          // returns number of #'s at the start of line, followed by space
 
    // handlers
-   void handleBoldAndItalics(string& line);
-   void handleBold(string& line);
-   void handleItalics(string& line);
-   void handleHeader(string& line);
+   void handleBoldAndItalics(string& line); // ***text*** --> <b><em>text</em></b>
+   void handleBold(string& line);           // **text** --> <b>text</b>
+   void handleItalics(string& line);        // *text* --> <em>text</em>
+   void handleHeader(string& line);         // # Hello World --> <h1>Hello World</h1>
+   void handleImage(string& line);          // ![alt text](path/to/photo.png) --> <img src="path/to/photo.png" alt="alt text">
+   void handleLink(string& line);
 };

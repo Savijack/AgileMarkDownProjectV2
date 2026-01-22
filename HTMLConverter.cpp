@@ -15,10 +15,10 @@ HTMLConverter::HTMLConverter(const string &filepath)
    }
 
    file.close();
-   for (size_t i = 0; i < lines.size(); i++)
-   {
-       cout << lines[i] << endl;
-   }
+//    for (size_t i = 0; i < lines.size(); i++)
+//    {
+//        cout << lines[i] << endl;
+//    }
 }
 
 void HTMLConverter::convert(const string& outputFilepath)
@@ -35,6 +35,9 @@ void HTMLConverter::convert(const string& outputFilepath)
         }
         if (hasHeader(line)) {
             handleHeader(line);
+        }
+        if (hasImage(line)) {
+            handleImage(line);
         }
     }
 
@@ -152,4 +155,14 @@ void HTMLConverter::handleHeader(string& line) {
     line = "<h" + to_string(num_headers) + ">"
         + regex_replace(line, pattern, "$1")
         + "</h" + to_string(num_headers) + ">";
+}
+void HTMLConverter::handleImage(string& line) {
+    const regex pattern(R"((!\[([^\]]+)\]\(([^)]+)\)))");
+    smatch m;
+    regex_search(line, m, pattern);
+    string replacement_string = "<img src=\"" + m[3].str() + "\" alt=\"" + m[2].str() + "\">";
+    line = regex_replace(line, pattern, replacement_string);
+}
+void HTMLConverter::handleLink(string& line) {
+    
 }
