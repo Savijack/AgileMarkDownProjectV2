@@ -2,6 +2,7 @@
 
 HTMLConverter::HTMLConverter(const string &filepath)
 {
+   // Opens file markdown file
    ifstream file(filepath);
    string line;
 
@@ -9,22 +10,21 @@ HTMLConverter::HTMLConverter(const string &filepath)
        cerr << "Error: Could not open the file." << endl;
        exit(0);
    }
-
+   
+   // Reads markdown file line by line and adds it to string
    while (getline(file, line)) {
-       lines.push_back(line);
+       markdownContent += line + "\n";
    }
 
+   // Closes file after reading
    file.close();
-   for (size_t i = 0; i < lines.size(); i++)
-   {
-       cout << lines[i] << endl;
-   }
+   cout << markdownContent << endl;
 }
 
 void HTMLConverter::convert(const string& outputFilepath)
 {
+    //creates and opens output file
     ofstream outputFile;
-    // Specify the filename with the .html extension
     outputFile.open(outputFilepath);
 
     if(outputFile.is_open())
@@ -36,16 +36,11 @@ void HTMLConverter::convert(const string& outputFilepath)
         cout << "file didn't open" << endl;
     }
 
-    // Write HTML content as strings
+    // Write HTML content to output file
     outputFile << "<!DOCTYPE html>\n";
     outputFile << "<html>\n";
     outputFile << "<body>\n";
-
-    for(size_t i = 0; i < output.size(); i++)
-    {
-        outputFile << output[i];
-    }
-
+    outputFile << htmlOutput;
     outputFile << "</body>\n";
     outputFile << "</html>\n";
     // Close the file

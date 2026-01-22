@@ -16,8 +16,8 @@ public:
 
 private:
 
-   vector<string> lines;
-   vector<string> output;
+   string markdownContent;
+   string htmlOutput;
    string filepath;
 
 };
