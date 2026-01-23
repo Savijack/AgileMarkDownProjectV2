@@ -23,3 +23,32 @@ TEST_CASE("Check creating output file")
 	}
 	delete test;
 }
+TEST_CASE("convertLine testcases")
+{
+	HTMLConverter * test = new HTMLConverter("./test_documents/1.md");
+    {
+        std::string s = "---";
+        test->convertLine(s);
+        REQUIRE(s == "<hr>");
+    }
+    {
+        std::string s = "   ---   ";
+        test->convertLine(s);
+        REQUIRE(s == "<hr>");
+    }
+    {
+        std::string s = "text --- text";
+        test->convertLine(s);
+        REQUIRE(s == "text --- text");
+    }
+    {
+        std::string s = "----";
+        test->convertLine(s);
+        REQUIRE(s == "----");
+    }
+    {
+        std::string s = "---\n";
+        test->convertLine(s);
+        REQUIRE(s == "<hr>");
+    }
+}

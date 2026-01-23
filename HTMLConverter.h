@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <regex>
 
 using namespace std;
 
@@ -12,8 +13,10 @@ public:
    HTMLConverter(const string& filepath);
    void readMD(const string& filepath);
    void convert(const string& outputFilepath);
-   void outputToFile(const string& filepath);
-   
+   void outputToFile();
+
+   void convertLine(string& s);
+
 private:
 
    string markdownContent;
