@@ -26,7 +26,40 @@ Once the syntax is converted to HTML, the string will be sent into a new HTML fi
 
 ## How To Install Dependencies
 
+No external dependencies are required for this project.
+
 ## How To Run The Application
+
+1. Prepare a document in MarkDown form that you wish to transform into HTML.
+2. Place the filepath of this document into the HTMLConverter constructor in main.cpp.
+3. Click the run button.
 
 ## How To Run Tests
 
+- Create a MarkDown file containing the MarkDown syntax that will be tested.
+- Use a separate .cpp file to perform tests.
+- Ensure test cases cover single and multiple instances of MarkDown syntax.
+- Test cases should have formatting similar to the following example:
+```
+TEST_CASE("Convert Italics Test Cases")
+{
+    HTMLConverter * test = new HTMLConverter("./test_documents/1.md");
+    {
+        string s = "*hello*";
+        test->convertItalics(s);
+        REQUIRE(s == "<em>hello</em>");
+    }
+
+    {
+        string s = "this is *italic* text";
+        test->convertItalics(s);
+        REQUIRE(s == "this is <em>italic</em> text");
+    }
+
+    {
+        string s = "*one* *two*";
+        test->convertItalics(s);
+        REQUIRE(s == "<em>one</em> <em>two</em>");
+    }
+}
+```
