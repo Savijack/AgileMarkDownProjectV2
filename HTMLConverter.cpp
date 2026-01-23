@@ -53,3 +53,26 @@ void HTMLConverter::convert(const string& outputFilepath)
 
     std::cout << "HTML file 'output.html' generated successfully." << std::endl;
 }
+
+void HTMLConverter::convertBold(string& line)
+{
+    string temp = line; // for iteration purposes
+    bool inBold = false;
+    for (int i = 0; i < line.size(); i++)
+    {
+        if (line[i] == '*' && line[i+1] == '*')
+        {
+            if (inBold)
+            {
+                temp.replace(i, 2, "</b>"); // ending **
+                inBold = false;
+            }
+            else
+            {
+                temp.replace(i, 2, "<b>");  // starting **
+                inBold = true; 
+            }
+        }
+        line = temp;
+    }
+}
