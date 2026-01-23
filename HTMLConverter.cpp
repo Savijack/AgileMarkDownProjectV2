@@ -55,7 +55,7 @@ void HTMLConverter::outputToFile(const string& filepath) {
     std::cout << "HTML file 'output.html' generated successfully." << std::endl;
 }
 //--
-void HTMLConverter::convertLine(std::string& s) {
+void HTMLConverter::convertLine(string& s) {
     static const regex pattern(R"((^|\n)\s*---\s*(?=\n|$))");
     s = regex_replace(s, pattern, "$1<hr>");
 }
