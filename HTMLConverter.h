@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <regex>
 
 using namespace std;
 
@@ -13,9 +14,14 @@ public:
    void readMD(const string& filepath);
    void convert(const string& outputFilepath);
    void outputToFile(const string& filepath);
+
+
    void convertBold(string& line);
+   void convertLine(string& s);
+   void convertHeaders(string& s);
 
-
+   int hasHeader(const string& line);
+   
 private:
 
    string markdownContent;
