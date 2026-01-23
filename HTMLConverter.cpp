@@ -18,14 +18,14 @@ HTMLConverter::HTMLConverter(const string &filepath)
 
    // Closes file after reading
    file.close();
-   //cout << markdownContent << endl;
+   cout << markdownContent << endl;
 }
 
 void HTMLConverter::convert(const string& outputFilepath)
 {
     convertLine(markdownContent);
     convertHeaders(markdownContent);
-
+    convertBold(markdownContent);
 
     htmlOutput = markdownContent;
     outputToFile(outputFilepath);
@@ -52,6 +52,30 @@ void HTMLConverter::outputToFile(const string& filepath) {
     // Close the file
     outputFile.close();
 
+
+    cout << "HTML file 'output.html' generated successfully." << endl;
+}
+
+
+void HTMLConverter::convertBold(string& line)
+{
+    bool inBold = false;
+    for (int i = 0; i < line.size(); i++)
+    {
+        if (line[i] == '*' && line[i+1] == '*') // looking for **
+        {
+            if (inBold)
+            {
+                line.replace(i, 2, "</b>"); // handles the ending **
+                inBold = false;
+            }
+            else 
+            {
+                line.replace(i, 2, "<b>");  // handles the starting **
+                inBold = true; 
+            }
+        }
+    }
     std::cout << "HTML file 'output.html' generated successfully." << std::endl;
 }
 //--

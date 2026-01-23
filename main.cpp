@@ -23,6 +23,40 @@ TEST_CASE("Check creating output file")
 	}
 	delete test;
 }
+
+TEST_CASE("Bold Conversion")
+{
+	HTMLConverter *test = new HTMLConverter("./test_documents/1.md");
+	
+	SECTION("Single Bold Word")
+	{
+		string input = "Hello **World**!";
+		test->convertBold(input);
+		REQUIRE(input == "Hello <b>World</b>!");
+	}
+
+	SECTION("Multiple Bold Words")
+	{
+		string input = "Hello **World I am** here!";
+		test->convertBold(input);
+		REQUIRE(input == "Hello <b>World I am</b> here!");
+	}
+
+	SECTION("Separated Bold Words")
+	{
+		string input = "Hello **World** I am **here!**";
+		test->convertBold(input);
+		REQUIRE(input == "Hello <b>World</b> I am <b>here!</b>");
+	}
+
+	SECTION("Touching Bold Words")
+	{
+		string input = "Hello **World** **I** am **here!**";
+		test->convertBold(input);
+		REQUIRE(input == "Hello <b>World</b> <b>I</b> am <b>here!</b>");
+	}
+	delete test;
+}
 TEST_CASE("convertLine testcases")
 {
 	HTMLConverter * test = new HTMLConverter("./test_documents/1.md");
