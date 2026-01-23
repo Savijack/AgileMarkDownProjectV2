@@ -23,16 +23,20 @@ HTMLConverter::HTMLConverter(const string &filepath)
 
 void HTMLConverter::convert(const string& outputFilepath)
 {
-    //creates and opens output file
-    ofstream outputFile;
-    outputFile.open(outputFilepath);
+    
 
-    if(outputFile.is_open())
-    {
+
+    outputToFile(outputFilepath);
+}
+//--
+void HTMLConverter::outputToFile(const string& filepath) {
+    ofstream outputFile;
+    outputFile.open(filepath);
+
+    if (outputFile.is_open()) {
         cout << "file opened" << endl;
     }
-    else
-    {
+    else {
         cout << "file didn't open" << endl;
     }
 
