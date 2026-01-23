@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <regex>
 
 using namespace std;
 
@@ -14,10 +15,12 @@ public:
    void convert(const string& outputFilepath);
    void outputToFile();
 
+   void convertLine(string& s);
+
 private:
 
-   vector<string> lines;
-   vector<string> output;
+   string markdownContent;
+   string htmlOutput;
    string filepath;
 
 };
