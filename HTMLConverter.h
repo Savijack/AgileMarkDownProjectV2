@@ -12,8 +12,8 @@ public:
    HTMLConverter(const string& filepath);
    void readMD(const string& filepath);
    void convert(const string& outputFilepath);
-   void outputToFile();
-
+   void outputToFile(const string& filepath);
+   
 private:
 
    string markdownContent;
