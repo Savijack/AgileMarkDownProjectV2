@@ -30,9 +30,9 @@ TEST_CASE("Bold Conversion")
 	
 	SECTION("Single Bold Word")
 	{
-		string input = "**Things I noticed**";
+		string input = "Hello **World**!";
 		test->convertBold(input);
-		REQUIRE(input == "<b>Things I noticed</b>");
+		REQUIRE(input == "Hello <b>World</b>!");
 	}
 
 	SECTION("Multiple Bold Words")
@@ -46,8 +46,14 @@ TEST_CASE("Bold Conversion")
 	{
 		string input = "Hello **World** I am **here!**";
 		test->convertBold(input);
-		REQUIRE(input == "Hello <b>World</b> I am <b>here!</b>" );
+		REQUIRE(input == "Hello <b>World</b> I am <b>here!</b>");
+	}
+
+	SECTION("Touching Bold Words")
+	{
+		string input = "Hello **World** **I** am **here!**";
+		test->convertBold(input);
+		REQUIRE(input == "Hello <b>World</b> <b>I</b> am <b>here!</b>");
 	}
 	delete test;
 }
-

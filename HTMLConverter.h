@@ -12,13 +12,14 @@ public:
    HTMLConverter(const string& filepath);
    void readMD(const string& filepath);
    void convert(const string& outputFilepath);
-   void outputToFile();
+   void outputToFile(const string& filepath);
    void convertBold(string& line);
+
 
 private:
 
-   vector<string> lines;
-   vector<string> output;
+   string markdownContent;
+   string htmlOutput;
    string filepath;
 
 };
