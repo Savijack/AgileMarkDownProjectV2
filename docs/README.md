@@ -1,8 +1,8 @@
-# MarkDown Converter
+# Serene Pathfinders MarkDown Converter
 
 ## Project Description
 
-This program is designed to take in a MarkDown file and convert the test to HTML. The project will be able to convert the following traditional MarkDown syntax into HTML:
+This program is designed to take in a MarkDown file and convert the text to HTML. The project will be able to convert the following traditional MarkDown syntax into HTML:
 
 - Headers
 - Paragraphs
@@ -15,7 +15,7 @@ This program is designed to take in a MarkDown file and convert the test to HTML
 - Code Blocks
 - Horizontal Lines
 
-Beyond the traditional symbols, the program will convert these custom syntax into HTML:
+Beyond traditional Markdown symbols, the program will convert these custom syntax into HTML:
 
 - Code with File Name
 - Highlight Code
@@ -36,10 +36,10 @@ No external dependencies are required for this project.
 
 ## How To Run Tests
 
-- Create a MarkDown file containing the MarkDown syntax that will be tested.
-- Use a separate .cpp file to perform tests.
-- Ensure test cases cover single and multiple instances of MarkDown syntax.
-- Test cases should have formatting similar to the following example:
+1. Create a MarkDown file containing the MarkDown syntax that will be tested.
+2. Use a separate .cpp file to perform tests.
+3. Ensure test cases cover single and multiple instances of MarkDown syntax.
+4. Test cases should have formatting similar to the following example:
 ```
 TEST_CASE("Convert Italics Test Cases")
 {
