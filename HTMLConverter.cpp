@@ -23,9 +23,12 @@ HTMLConverter::HTMLConverter(const string &filepath)
 
 void HTMLConverter::convert(const string& outputFilepath)
 {
+    // this should be one of the first things called to make things easier for the other functions to parse
+    separateCodeBlocks(markdownContent);
+
     convertLine(markdownContent);
     convertHeaders(markdownContent);
-
+    convertBold(markdownContent);
 
     htmlOutput = markdownContent;
     outputToFile(outputFilepath);
@@ -52,6 +55,30 @@ void HTMLConverter::outputToFile(const string& filepath) {
     // Close the file
     outputFile.close();
 
+
+    cout << "HTML file 'output.html' generated successfully." << endl;
+}
+
+
+void HTMLConverter::convertBold(string& line)
+{
+    bool inBold = false;
+    for (int i = 0; i < line.size(); i++)
+    {
+        if (line[i] == '*' && line[i+1] == '*') // looking for **
+        {
+            if (inBold)
+            {
+                line.replace(i, 2, "</b>"); // handles the ending **
+                inBold = false;
+            }
+            else 
+            {
+                line.replace(i, 2, "<b>");  // handles the starting **
+                inBold = true; 
+            }
+        }
+    }
     std::cout << "HTML file 'output.html' generated successfully." << std::endl;
 }
 //--
@@ -94,4 +121,19 @@ void HTMLConverter::convertHeaders(string& text) {
     }
 
     text = result;
+}
+void HTMLConverter::separateCodeBlocks(string& s) {
+    // for a visualization of what this pattern matches, see: regexr.com/8jdpk
+    static const regex re(R"(```(?:.|\n)*?```)");
+    smatch m; // smatch is an object that stores matches from regex_search()
+    size_t count = 0;
+
+    while (regex_search(s, m, re)) {
+         // stash each codeblock in a vector<string> that's a member of HTMLConverter class
+        codeblocks.push_back(m[0].str());
+
+        // inserts a string that looks like <{codeblock:i}> in place of the actual codeblock. i is the index in the codeblocks vector.
+        string placeholder = "<{codeblock:" + to_string(count++) + "}>";
+        s.replace(m.position(0), m.length(0), placeholder);
+    }
 }
