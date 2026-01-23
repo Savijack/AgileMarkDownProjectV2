@@ -10,7 +10,7 @@ using namespace std;
 //--
 TEST_CASE("Check creating output file")  
 {
-	HTMLConverter *test = new HTMLConverter("./test_documents/1.md");
+	HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
 	SECTION("Test Document 1")
 	{
 		test->convert("output.html");
@@ -165,4 +165,50 @@ TEST_CASE("convertHeaders: header followed by blank line")
         "\n"
         "Text\n"
     );
+}
+
+TEST_CASE("separateCodeBlocks: single code block") {
+    HTMLConverter test("./test_documents/1.md");
+    string s =
+        "Here is some text\n"
+        "```int x = 5;```\n"
+        "More text";
+
+    test.separateCodeBlocks(s);
+
+    REQUIRE(test.codeblocks.size() == 1);
+    REQUIRE(test.codeblocks[0] == "```int x = 5;```");
+    REQUIRE(s == "Here is some text\n<{codeblock:0}>\nMore text");
+}
+TEST_CASE("separateCodeBlocks: multiple code blocks") {
+    HTMLConverter test("./test_documents/1.md");
+    string s =
+        "Start\n"
+        "```code A```\n"
+        "Middle\n"
+        "```code B```\n"
+        "End";
+
+    test.separateCodeBlocks(s);
+
+    REQUIRE(test.codeblocks.size() == 2);
+    REQUIRE(test.codeblocks[0] == "```code A```");
+    REQUIRE(test.codeblocks[1] == "```code B```");
+
+    REQUIRE(s ==
+        "Start\n"
+        "<{codeblock:0}>\n"
+        "Middle\n"
+        "<{codeblock:1}>\n"
+        "End");
+}
+TEST_CASE("separateCodeBlocks: no code blocks") {
+    HTMLConverter test("./test_documents/1.md");
+    string original = "Just plain text\nNo code here";
+    string s = original;
+
+    test.separateCodeBlocks(s);
+
+    REQUIRE(test.codeblocks.empty());
+    REQUIRE(s == original);
 }

@@ -15,17 +15,20 @@ public:
    void convert(const string& outputFilepath);
    void outputToFile(const string& filepath);
 
-
+   void separateCodeBlocks(string& s);
    void convertBold(string& line);
    void convertLine(string& s);
    void convertHeaders(string& s);
 
    int hasHeader(const string& line);
    
+   vector<string> codeblocks;
+
 private:
 
    string markdownContent;
    string htmlOutput;
    string filepath;
+   
 
 };
