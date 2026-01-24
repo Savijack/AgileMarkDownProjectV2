@@ -137,3 +137,27 @@ void HTMLConverter::separateCodeBlocks(string& s) {
         s.replace(m.position(0), m.length(0), placeholder);
     }
 }
+
+void HTMLConverter::convertItalics(string& line)
+{
+    string retVal = "";
+    bool inItalics = false;
+
+    //going through the string, checking each char for '*', and replacing with proper format when found
+    for (int i = 0; i < line.length(); i++) {
+        if (line[i] == '*' && line[i+1] != '*') {
+            if (inItalics) {
+                retVal += "</em>"; 
+            }
+            else {
+                retVal += "<em>";
+            }
+            inItalics = !inItalics; 
+        }
+        else {
+            retVal += line[i]; 
+        }
+    }
+
+    line = retVal;
+}
