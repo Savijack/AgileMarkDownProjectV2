@@ -19,6 +19,7 @@ public:
    void convertBold(string& line);
    void convertLine(string& s);
    void convertHeaders(string& s);
+   void convertItalics(string& line); 
 
    int hasHeader(const string& line);
    

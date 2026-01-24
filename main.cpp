@@ -212,3 +212,21 @@ TEST_CASE("separateCodeBlocks: no code blocks") {
     REQUIRE(test.codeblocks.empty());
     REQUIRE(s == original);
 }
+
+TEST_CASE("convert italic function")
+{
+	HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
+	SECTION("Test single italic")
+	{
+		string s = "*hello*";
+		test->convertItalics(s);
+		REQUIRE(s == "<em>hello</em>");
+	}
+	SECTION("Test multiple italics")
+	{
+		string s = "*one* and *two*";
+		test->convertItalics(s);
+		REQUIRE(s == "<em>one</em> and <em>two</em>");
+	}
+	delete test; 
+}
