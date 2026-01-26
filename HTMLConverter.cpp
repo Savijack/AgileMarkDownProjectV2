@@ -31,6 +31,7 @@ void HTMLConverter::convert(const string& outputFilepath)
     convertBold(markdownContent);
     convertItalics(markdownContent);
     convertImages(markdownContent);
+    convertLinks(markdownContent);
 
     for (auto& cb : codeblocks) {
         processCodeblock(cb);
@@ -182,6 +183,44 @@ void HTMLConverter::convertImages(string& line)
                     retVal += "<img src=\"" + urlText + "\" alt=\"" + altText + "\">";
 
                     //get past the image text
+                    i = endURL; 
+                    continue; 
+                }
+            }
+        }
+        retVal += line[i]; 
+    }
+    line = retVal; 
+}
+void HTMLConverter::convertLinks(string& line)
+{
+    string retVal = ""; 
+
+    //go through string
+    for(size_t i=0; i<line.length(); i++)
+    {
+        if(i+1 < line.length() && line[i] == '[') //checking for link formatting
+        {
+            //finding the indexes of the alt/description text
+            size_t text = i+1;
+            size_t endText = line.find(']',text);
+
+            if(line[endText+1] == '(' && endText != string::npos) //checking for start of url and making sure end of text was found
+            {
+                //finding the indexes of the link text
+                size_t url = endText+2; 
+                size_t endURL = line.find(')',url); 
+
+                if(endURL != string::npos) //making sure end of url found
+                {
+                    //creating strings for alt and url texts
+                    string altText = line.substr(text, endText-text); 
+                    string urlText = line.substr(url, endURL-url); 
+
+                    //update retVal
+                    retVal += "<a href=\"" + urlText + "\">" + altText + "</a>";
+
+                    //get past the link text
                     i = endURL; 
                     continue; 
                 }

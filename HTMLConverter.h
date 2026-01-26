@@ -23,6 +23,7 @@ public:
    void convertHeaders(string& s);
    void convertItalics(string& line); 
    void convertImages(string& line);
+   void convertLinks(string& line);
 
    int hasHeader(const string& line);
    
