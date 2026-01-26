@@ -32,6 +32,10 @@ void HTMLConverter::convert(const string& outputFilepath)
     convertItalics(markdownContent);
     convertImages(markdownContent);
 
+    for (auto& cb : codeblocks) {
+        processCodeblock(cb);
+    }
+    restoreCodeBlocks(markdownContent);
     htmlOutput = markdownContent;
     outputToFile(outputFilepath);
 }
@@ -124,21 +128,6 @@ void HTMLConverter::convertHeaders(string& text) {
 
     text = result;
 }
-void HTMLConverter::separateCodeBlocks(string& s) {
-    // for a visualization of what this pattern matches, see: regexr.com/8jdpk
-    static const regex re(R"(```(?:.|\n)*?```)");
-    smatch m; // smatch is an object that stores matches from regex_search()
-    size_t count = 0;
-
-    while (regex_search(s, m, re)) {
-         // stash each codeblock in a vector<string> that's a member of HTMLConverter class
-        codeblocks.push_back(m[0].str());
-
-        // inserts a string that looks like <{codeblock:i}> in place of the actual codeblock. i is the index in the codeblocks vector.
-        string placeholder = "<{codeblock:" + to_string(count++) + "}>";
-        s.replace(m.position(0), m.length(0), placeholder);
-    }
-}
 
 void HTMLConverter::convertItalics(string& line)
 {
@@ -201,4 +190,74 @@ void HTMLConverter::convertImages(string& line)
         retVal += line[i]; 
     }
     line = retVal; 
+}
+//--
+void HTMLConverter::separateCodeBlocks(string& s) {
+    // for a visualization of what this pattern matches, see: regexr.com/8jdpk
+    static const regex re(R"(```(?:.|\n)*?```)");
+    smatch m; // smatch is an object that stores matches from regex_search()
+    size_t count = 0;
+
+    while (regex_search(s, m, re)) {
+         // stash each codeblock in a vector<string> that's a member of HTMLConverter class
+        codeblocks.push_back(m[0].str());
+
+        // inserts a string that looks like <{codeblock:i}> in place of the actual codeblock. i is the index in the codeblocks vector.
+        string placeholder = "<{codeblock:" + to_string(count++) + "}>";
+        s.replace(m.position(0), m.length(0), placeholder);
+    }
+}
+//--
+// this function effectively reverses HTMLConverter::separateCodeBlocks()
+void HTMLConverter::restoreCodeBlocks(string& s) {
+    // for a visualization/explanation of this pattern, see: regexr.com/8jell
+    static const regex re(R"(<\{codeblock:(\d+)\}>)");
+    smatch m; // smatch is an object that stores matches from regex_search()
+
+    while (regex_search(s, m, re)) {
+        size_t i = stoul(m[1].str()); // stoul() is string to long unsigned, to use as indexes in codeblocks vector
+        s.replace(m.position(0), m.length(0), codeblocks[i]);
+    }
+}
+//--
+void HTMLConverter::processCodeblock(string& cb) {
+    string html_str;
+
+    // grab first line for metadata e.g. file="", highlights="", etc
+    size_t first_newline = cb.find('\n');
+    if (first_newline == string::npos) {
+        cb.clear(); // bad codeblock
+        return;
+    }
+    string header = cb.substr(3, first_newline - 3); // header minus ```
+
+    // remove opening ```
+    cb = cb.substr(first_newline + 1);
+
+    // remove closing ```
+    size_t closing_backticks = cb.rfind("```");
+    if (closing_backticks != string::npos) {
+        cb.erase(closing_backticks);
+    }
+
+    // for visualization/explanation of this pattern, see: regexr.com/8jelu
+    static const regex file_pattern(R"(file=\"(.*?)\")");
+    smatch m; // smatch is an object that stores matches from regex_search()
+
+    if (regex_search(header, m, file_pattern)) { // if it has a filename specifier
+        html_str =
+            "<figure class=\"codeblock\">\n"
+            "  <figcaption class=\"codeblock__title\">" + m[1].str() + "</figcaption>\n"
+            "  <pre><code>\n" +
+            cb +
+            "\n  </code></pre>\n"
+            "</figure>";
+    }
+    else { // no filename specifier
+        html_str =
+            "<pre class=\"codeblock\"><code>\n" +
+            cb +
+            "\n</code></pre>";
+    }
+    cb = html_str;
 }
