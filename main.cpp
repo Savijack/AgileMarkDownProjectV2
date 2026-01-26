@@ -254,23 +254,3 @@ TEST_CASE("convert image function")
     }
 	delete test; 
 }
-// TEST_CASE("processCodeblock: file header -> figure+caption") {
-//     HTMLConverter c("./test_documents/1.md");
-
-//     string cb =
-//         "``` file=\"main.cpp\"\n"
-//         "int x = 10;\n"
-//         "return x;\n"
-//         "```";
-
-//     c.processCodeblock(cb);
-
-//     REQUIRE(cb.find("<figure class=\"codeblock\">") != string::npos);
-//     REQUIRE(cb.find("<figcaption class=\"codeblock__title\">main.cpp</figcaption>") != string::npos);
-//     REQUIRE(cb.find("  <pre><code>\n") != string::npos);
-
-//     REQUIRE(cb.find("int x = 10;\nreturn x;\n") != string::npos);
-
-//     REQUIRE(cb.find("</figure>") != string::npos);
-//     REQUIRE(cb.find("```") == string::npos);
-// }
