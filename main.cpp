@@ -297,3 +297,36 @@ TEST_CASE("convert link function")
     }
 	delete test; 
 }
+TEST_CASE("convert paragraph function")
+{
+    HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
+    SECTION("one paragraph")
+    {
+        string s = "this is a paragraph.\n\n";
+        test->convertParagraphs(s);
+        REQUIRE(s == "<p>this is a paragraph.</p>");
+    }
+    SECTION("two paragraphs")
+    {
+        string s = "this is paragraph one.\n\nthis is paragraph two.";
+        test->convertParagraphs(s);
+        REQUIRE(s == "<p>this is paragraph one.</p><p>this is paragraph two.</p>");
+    }
+    SECTION("many paragraphs")
+    {
+        string s = "this is paragraph one.\n\nthis is paragraph two.\n\nthis is paragraph three.\n\nthis is paragraph four.";
+        test->convertParagraphs(s);
+        REQUIRE(s == "<p>this is paragraph one.</p><p>this is paragraph two.</p><p>this is paragraph three.</p><p>this is paragraph four.</p>");
+    }
+    SECTION("ignores a single 'new line' operator")
+    {
+        string s = "this is\nparagraph one.";
+        test->convertParagraphs(s);
+        REQUIRE(s == "this is paragraph one.");
+    }
+    SECTION("starts with two new lines")
+    {
+
+    }
+    delete test;
+}

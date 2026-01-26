@@ -24,6 +24,7 @@ public:
    void convertItalics(string& line); 
    void convertImages(string& line);
    void convertLinks(string& line);
+   void convertParagraphs(string& line);
 
    int hasHeader(const string& line);
    

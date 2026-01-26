@@ -300,3 +300,24 @@ void HTMLConverter::processCodeblock(string& cb) {
     }
     cb = html_str;
 }
+void HTMLConverter::convertParagraphs(string& line)
+{
+    string retVal = "";
+    size_t start = 0;
+
+    while (start <= line.size() - 1)
+    {
+        size_t temp = line.find("\n\n", start);
+        if (temp == string::npos)
+        {
+            temp = line.size();
+        }
+        string paragraph = line.substr(start, temp - start);
+        if (!paragraph.empty())
+        {
+            retVal += "<p>" + paragraph + "</p>";
+        }
+        start = temp + 2;
+    }
+    line = retVal;
+}
