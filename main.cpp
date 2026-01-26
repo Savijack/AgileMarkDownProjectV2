@@ -230,3 +230,27 @@ TEST_CASE("convert italic function")
 	}
 	delete test; 
 }
+
+TEST_CASE("convert image function")
+{
+    HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
+	SECTION("simple image")
+    {
+        string s = "![bed](bed.png)";
+        test->convertImages(s); 
+        REQUIRE(s == "<img src=\"bed.png\" alt=\"bed\">");
+    }
+    SECTION("image in text")
+    {
+        string s = "one, two, ![image](image.jpg) three";
+        test->convertImages(s); 
+        REQUIRE(s == "one, two, <img src=\"image.jpg\" alt=\"image\"> three");
+    }
+    SECTION("two images")
+    {
+        string s = "![image1](image1.jpg) and ![image2](image2.jpg)";
+        test->convertImages(s); 
+        REQUIRE(s == "<img src=\"image1.jpg\" alt=\"image1\"> and <img src=\"image2.jpg\" alt=\"image2\">");
+    }
+	delete test; 
+}
