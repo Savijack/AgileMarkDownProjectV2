@@ -167,19 +167,19 @@ void convertImages(string& line)
     string retVal = ""; 
 
     //go through string
-    for(int i=0; i<line.length(); i++)
+    for(size_t i=0; i<line.length(); i++)
     {
         if(line[i] == '!' && line[i+1] == '[' && i+1 < line.length()) //checking for image formatting
         {
             //finding the indexes of the alt/description text
-            int alt = i+1; 
-            int endAlt = line.find(']',alt);
+            size_t alt = i+1; 
+            size_t endAlt = line.find(']',alt);
 
             if(line[endAlt+1] == '(' && endAlt != string::npos) //checking for start of url and making sure end of alt was found
             {
                 //finding the indexes of the image URL
-                int url = endAlt+2; 
-                int endURL = line.find(')',url); 
+                size_t url = endAlt+2; 
+                size_t endURL = line.find(')',url); 
 
                 if(endURL != string::npos) //making sure end of url found
                 {
