@@ -24,9 +24,9 @@ Beyond traditional Markdown symbols, the program will convert these custom synta
 
 Once the syntax is converted to HTML, the string will be sent into a new HTML file that can be accessed by the user.
 
-## How To Install Dependencies
+## Install Dependencies
 
-No external dependencies are required for this project.
+A C++ compiler such as Microsoft Visual C++ Compiler is necessary to run this code.
 
 ## How To Run The Application
 
