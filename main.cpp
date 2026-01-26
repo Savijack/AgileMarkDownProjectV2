@@ -274,3 +274,26 @@ TEST_CASE("processCodeblock: file header -> figure+caption") {
     REQUIRE(cb.find("</figure>") != string::npos);
     REQUIRE(cb.find("```") == string::npos);
 }
+TEST_CASE("convert link function")
+{
+    HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
+	SECTION("simple link")
+    {
+        string s = "[bed](bed.com)";
+        test->convertLinks(s); 
+        REQUIRE(s == "<a href=\"bed.com\">bed</a>");
+    }
+    SECTION("image in text")
+    {
+        string s = "one, two, [link](link.com) three";
+        test->convertLinks(s); 
+        REQUIRE(s == "one, two, <a href=\"link.com\">link</a> three");
+    }
+    SECTION("two images")
+    {
+        string s = "[link1](link1.com) and [link2](link2.com)";
+        test->convertLinks(s); 
+        REQUIRE(s == "<a href=\"link1.com\">link1</a> and <a href=\"link2.com\">link2</a>");
+    }
+	delete test; 
+}
