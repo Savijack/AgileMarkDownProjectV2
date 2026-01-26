@@ -171,7 +171,7 @@ void HTMLConverter::convertImages(string& line)
     //go through string
     for(size_t i=0; i<line.length(); i++)
     {
-        if(line[i] == '!' && line[i+1] == '[' && i+1 < line.length()) //checking for image formatting
+        if(line[i] == '!' && i+1 < line.length() && line[i+1] == '[') //checking for image formatting
         {
             //finding the indexes of the alt/description text
             size_t alt = i+2; 
