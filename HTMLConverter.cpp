@@ -29,6 +29,7 @@ void HTMLConverter::convert(const string& outputFilepath)
     convertLine(markdownContent);
     convertHeaders(markdownContent);
     convertBold(markdownContent);
+    convertItalics(markdownContent);
 
     htmlOutput = markdownContent;
     outputToFile(outputFilepath);
@@ -63,7 +64,7 @@ void HTMLConverter::outputToFile(const string& filepath) {
 void HTMLConverter::convertBold(string& line)
 {
     bool inBold = false;
-    for (int i = 0; i < line.size(); i++)
+    for (size_t i = 0; i < line.size(); i++)
     {
         if (line[i] == '*' && line[i+1] == '*') // looking for **
         {
@@ -144,7 +145,7 @@ void HTMLConverter::convertItalics(string& line)
     bool inItalics = false;
 
     //going through the string, checking each char for '*', and replacing with proper format when found
-    for (int i = 0; i < line.length(); i++) {
+    for (size_t i = 0; i < line.length(); i++) {
         if (line[i] == '*' && line[i+1] != '*') {
             if (inItalics) {
                 retVal += "</em>"; 
