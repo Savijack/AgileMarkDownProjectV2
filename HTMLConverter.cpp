@@ -30,6 +30,7 @@ void HTMLConverter::convert(const string& outputFilepath)
     convertHeaders(markdownContent);
     convertBold(markdownContent);
     convertItalics(markdownContent);
+    convertImages(markdownContent);
 
     htmlOutput = markdownContent;
     outputToFile(outputFilepath);
@@ -163,7 +164,7 @@ void HTMLConverter::convertItalics(string& line)
     line = retVal;
 }
 
-void convertImages(string& line)
+void HTMLConverter::convertImages(string& line)
 {
     string retVal = ""; 
 
@@ -173,7 +174,7 @@ void convertImages(string& line)
         if(line[i] == '!' && line[i+1] == '[' && i+1 < line.length()) //checking for image formatting
         {
             //finding the indexes of the alt/description text
-            size_t alt = i+1; 
+            size_t alt = i+2; 
             size_t endAlt = line.find(']',alt);
 
             if(line[endAlt+1] == '(' && endAlt != string::npos) //checking for start of url and making sure end of alt was found
@@ -189,9 +190,15 @@ void convertImages(string& line)
                     string urlText = line.substr(url, endURL-url); 
 
                     //update retVal
-                    retVal += "";
+                    retVal += "<img src=\"" + urlText + "\" alt=\"" + altText + "\">";
+
+                    //get past the image text
+                    i = endURL; 
+                    continue; 
                 }
             }
         }
+        retVal += line[i]; 
     }
+    line = retVal; 
 }
