@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
-
+#include <sstream>
 using namespace std;
 
 class HTMLConverter {
@@ -34,6 +34,5 @@ private:
    string markdownContent;
    string htmlOutput;
    string filepath;
-   
 
 };
