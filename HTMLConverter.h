@@ -11,11 +11,13 @@ class HTMLConverter {
 public:
 
    HTMLConverter(const string& filepath);
-   void readMD(const string& filepath);
    void convert(const string& outputFilepath);
    void outputToFile(const string& filepath);
 
    void separateCodeBlocks(string& s);
+   void restoreCodeBlocks(string& s);
+   void processCodeblock(string& cb);
+
    void convertBold(string& line);
    void convertLine(string& s);
    void convertHeaders(string& s);
