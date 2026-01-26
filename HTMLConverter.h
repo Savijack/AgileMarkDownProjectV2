@@ -20,6 +20,7 @@ public:
    void convertLine(string& s);
    void convertHeaders(string& s);
    void convertItalics(string& line); 
+   void convertImages(string& line);
 
    int hasHeader(const string& line);
    
