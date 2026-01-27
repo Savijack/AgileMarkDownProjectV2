@@ -121,6 +121,18 @@ void HTMLConverter::outputToFile(const string& filepath) {
     pre.codeblock ::selection {
         background: rgba(120, 160, 255, 0.25);
     }
+    figure.codeblock.program-output pre.codeblock {
+        padding: 0.75em 1em;   /* space on all sides */
+    }
+
+    figure.codeblock.program-output pre.codeblock > code {
+        padding: 0;           /* keep code tight inside pre */
+    }
+
+    /* program output has no line spans, so give it breathing room */
+    figure.codeblock.program-output pre.codeblock {
+        line-height: 1.25;
+    }
     )";
     outputFile << "</style>\n</head>\n<body>\n";
     outputFile << htmlOutput;
@@ -341,14 +353,20 @@ static string htmlEscape(const string& s) {
 }
 
 void HTMLConverter::processCodeblock(string& cb) {
+    
+    if (cb.find("program-output")) {
+        handleProgramOutput(cb);
+        return;
+    }
+    
     // grab first line for metadata e.g. file="", highlight=""
     size_t first_newline = cb.find('\n');
     if (first_newline == string::npos) {
         cb.clear(); // bad codeblock
         return;
     }
+    
     string header = cb.substr(3, first_newline - 3); // header minus ```
-
     // remove opening ```
     cb = cb.substr(first_newline + 1);
 
@@ -404,8 +422,9 @@ void HTMLConverter::processCodeblock(string& cb) {
                     swap(a, b);
                 }
                 for (int n = a; n <= b; ++n) {
-                    if (n >= 1 and static_cast<size_t>(n) <= lines.size())
+                    if (n >= 1 and static_cast<size_t>(n) <= lines.size()) {
                         highlight[n - 1] = true;
+                    }
                 }
             }
         }
@@ -416,7 +435,9 @@ void HTMLConverter::processCodeblock(string& cb) {
 
     for (size_t i = 0; i < lines.size(); ++i) {
         string classes = "line";
-        if (highlight[i]) classes += " highlight";
+        if (highlight[i]) {
+            classes += " highlight";
+        }
 
         code_html += "<span class=\"" + classes + "\">"
                    + htmlEscape(lines[i]) +
@@ -434,8 +455,35 @@ void HTMLConverter::processCodeblock(string& cb) {
             "<figcaption class=\"codeblock__title\">" + htmlEscape(m[1].str()) + "</figcaption>\n" +
             code_html +
             "</figure>\n";
-    } else {
+    } 
+    else {
         cb = code_html;
     }
 }
 
+void HTMLConverter::handleProgramOutput(string& cb) {
+    // find first newline (end of ```program-output line)
+    size_t first_newline = cb.find('\n');
+    if (first_newline == string::npos) {
+        cb.clear();
+        return;
+    }
+
+    // strip opening ``` line
+    cb = cb.substr(first_newline + 1);
+
+    // strip closing ```
+    size_t closing_backticks = cb.rfind("```");
+    if (closing_backticks != string::npos) {
+        cb.erase(closing_backticks);
+    }
+
+    // return HTML conversion through parameter
+    cb =
+        "<figure class=\"codeblock program-output\">\n"
+        "<figcaption class=\"codeblock__title\">Program Output</figcaption>\n"
+        "<pre class=\"codeblock\"><code>\n"
+        + htmlEscape(cb) +
+        "\n</code></pre>\n"
+        "</figure>\n";
+}
