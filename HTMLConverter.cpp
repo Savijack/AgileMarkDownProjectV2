@@ -460,6 +460,158 @@ void HTMLConverter::processCodeblock(string& cb) {
     }
 }
 
+void HTMLConverter::convertLists(string& text)
+{
+    string result;
+    string line;
+    stringstream ss(text);
+    
+    vector<string> listStack;  // stack to track open list tags
+    vector<int> indentStack;   // stack to track actual indents
+
+    // since markdown is very flexible with indentation, this tracks what the text is using to avoid guessing
+    int indentUnit = 0;
+    
+    // regex patterns for list items
+    static const regex unorderedPattern(R"(^(\s*)([-*+]) (.+)$)");
+    static const regex orderedPattern(R"(^(\s*)(\d+)\. (.+)$)");
+    
+    while (getline(ss, line))
+    {
+        smatch match;
+        bool isUnorderedItem = false;
+        bool isOrderedItem = false;
+        int spaceCount = 0;
+        size_t contentStart = 0;
+        
+        // check for unordered list marker
+        if (regex_match(line, match, unorderedPattern))
+        {
+            isUnorderedItem = true;
+            spaceCount = match[1].length();
+            contentStart = match.position(3);
+        }
+        // check for ordered list marker
+        else if (regex_match(line, match, orderedPattern))
+        {
+            isOrderedItem = true;
+            spaceCount = match[1].length();
+            contentStart = match.position(3);
+        }
+        else
+        {
+            // count leading spaces for non-list lines
+            while (spaceCount < (int)line.length() && line[spaceCount] == ' ')
+            {
+                spaceCount++;
+            }
+        }
+        
+        // is list ordered or unordered
+        string itemListType = "";
+        if (isUnorderedItem)
+        {
+            itemListType = "ul";
+        }
+        else if (isOrderedItem)
+        {
+            itemListType = "ol";
+        }
+        
+        if (itemListType != "")
+        {
+            // get indent unit from first line
+            if (indentUnit == 0 && !indentStack.empty() && spaceCount > indentStack.back())
+            {
+                indentUnit = spaceCount - indentStack.back();
+            }
+            
+            // close lists that are at deeper indent levels than current
+            while (!indentStack.empty() && indentStack.back() > spaceCount)
+            {
+                indentStack.pop_back();
+                string closingTag = listStack.back();
+                listStack.pop_back();
+                for (int i = 0; i < (int)indentStack.size(); i++)
+                {
+                    result += "  ";
+                }
+                result += "</" + closingTag + ">\n";
+            }
+            
+            // check if we need to open a new list
+            if (indentStack.empty() || spaceCount > indentStack.back())
+            {
+                // opening a nested list
+                for (int i = 0; i < (int)indentStack.size(); i++)
+                {
+                    result += "  ";
+                }
+                result += "<" + itemListType + ">\n";
+                listStack.push_back(itemListType);
+                indentStack.push_back(spaceCount);
+            }
+            else if (spaceCount == indentStack.back() && !listStack.empty() && listStack.back() != itemListType)
+            {
+                // list type changed at same level
+                for (int i = 0; i < (int)indentStack.size() - 1; i++)
+                {
+                    result += "  ";
+                }
+                result += "</" + listStack.back() + ">\n";
+                listStack.pop_back();
+                indentStack.pop_back();
+                
+                for (int i = 0; i < (int)indentStack.size(); i++)
+                {
+                    result += "  ";
+                }
+                result += "<" + itemListType + ">\n";
+                listStack.push_back(itemListType);
+                indentStack.push_back(spaceCount);
+            }
+            
+            // add the list item
+            for (int i = 0; i < (int)indentStack.size(); i++)
+            {
+                result += "  ";
+            }
+            result += "<li>" + line.substr(contentStart) + "</li>\n";
+        }
+        else
+        {
+            // not a list item - close any open lists
+            while (!indentStack.empty())
+            {
+                indentStack.pop_back();
+                string closingTag = listStack.back();
+                listStack.pop_back();
+                for (int i = 0; i < (int)indentStack.size(); i++)
+                {
+                    result += "  ";
+                }
+                result += "</" + closingTag + ">\n";
+            }
+            result += line + "\n";
+        }
+    }
+    
+    // close any remaining open lists
+    while (!indentStack.empty())
+    {
+        indentStack.pop_back();
+        string closingTag = listStack.back();
+        listStack.pop_back();
+        for (int i = 0; i < (int)indentStack.size(); i++)
+        {
+            result += "  ";
+        }
+        result += "</" + closingTag + ">\n";
+    }
+    
+    text = result;
+}
+
 void HTMLConverter::handleProgramOutput(string& cb) {
     // find first newline (end of ```program-output line)
     size_t first_newline = cb.find('\n');
