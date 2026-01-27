@@ -17,7 +17,8 @@ public:
    void separateCodeBlocks(string& s);
    void restoreCodeBlocks(string& s);
    void processCodeblock(string& cb);
-
+   void handleProgramOutput(string& cb);
+   
    void convertBold(string& line);
    void convertLine(string& s);
    void convertHeaders(string& s);
