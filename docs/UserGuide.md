@@ -13,18 +13,22 @@ Serene Pathfinder's Agile Markdown Converter allows the user to input a Markdown
 
 ## Examples
 
-Please check the "test_documents" for example Markdown documents. Please use the syntax as described below:
+Please check the "test_documents" for example Markdown documents. Please use the Markdown syntax as described below:
 - Headers (1-6 #'s)
 - Paragraphs (\n \n)
-- Italics (*italics*)
-- Bold (**bolded**)
-- Lists
-- Links
-- Images
+- Italics (\*italics\*)
+- Bold (\*\*bolded\*\*)
+- Ordered Lists (\n_ text)
+- Unordered Lists (\n1. text)
+- Links ([link text](url))
+- Images (![alt text](url))
 - Single Lines of Code (`)
 - Code Blocks (```)
 - Horizontal Lines (---)
-- Code with File Name (``` filename: name)
-- Highlight Code (highlight)
-- Multiline Highlight (highlight)
-- Create Table (table)
+- Code with File Name (``` file = "main.cpp")
+- Highlight Code ([<int x;>])
+- Multiline Highlight (highlight = "3-5, 8")
+- Create Table:
+    :::table [col1][col2][col3]
+             [text][text][text]
+    :::
