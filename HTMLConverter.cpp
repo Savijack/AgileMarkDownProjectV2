@@ -26,6 +26,7 @@ void HTMLConverter::convert(const string& outputFilepath)
     // this should be one of the first things called to make things easier for the other functions to parse
     separateCodeBlocks(markdownContent);
 
+    convertLists(markdownContent);
     convertLine(markdownContent);
     convertHeaders(markdownContent);
     convertBold(markdownContent);
