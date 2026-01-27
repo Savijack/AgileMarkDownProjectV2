@@ -13,7 +13,7 @@ HTMLConverter::HTMLConverter(const string &filepath)
    
    // Reads markdown file line by line and adds it to string
    while (getline(file, line)) {
-       markdownContent += line + "\n";
+       markdownContent += line + "\n"; 
    }
 
    // Closes file after reading
@@ -26,6 +26,7 @@ void HTMLConverter::convert(const string& outputFilepath)
     // this should be one of the first things called to make things easier for the other functions to parse
     separateCodeBlocks(markdownContent);
 
+    convertLists(markdownContent);
     convertLine(markdownContent);
     convertHeaders(markdownContent);
     convertBold(markdownContent);
@@ -55,18 +56,93 @@ void HTMLConverter::outputToFile(const string& filepath) {
 
     // Write HTML content to output file
     outputFile << "<!DOCTYPE html>\n";
-    outputFile << "<html>\n";
-    outputFile << "<body>\n";
+    outputFile << "<html>\n<head>\n";
+    outputFile << "<style>\n";
+    outputFile << 
+    R"(
+    figure.codeblock {
+        margin: 1.5em 0;
+        border: 1px solid #444;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #1e1e1e;
+    }
+
+    figure.codeblock > figcaption.codeblock__title {
+        background: #2a2a2a;
+        color: #ddd;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.9em;
+        padding: 0.5em 0.75em;
+        text-align: center;
+        border-bottom: 1px solid #444;
+    }
+
+    pre.codeblock {
+        margin: 0;
+        padding: 0.75em 0;
+        overflow-x: auto;
+        counter-reset: line;
+    }
+
+    pre.codeblock > code {
+        display: block;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.95em;
+        line-height: 1;
+        color: #eee;
+    }
+
+    pre.codeblock .line {
+        display: block;
+        position: relative;
+        padding: 0 1em 0 4.25em;
+        white-space: pre;
+    }
+
+    pre.codeblock .line::before {
+        counter-increment: line;
+        content: counter(line);
+        position: absolute;
+        left: 0;
+        width: 3.25em;
+        padding-right: 0.75em;
+        text-align: right;
+        color: #888;
+        user-select: none;
+    }
+
+    pre.codeblock .line.highlight {
+        background: rgba(255, 255, 0, 0.12);
+    }
+
+    pre.codeblock .line.highlight::before {
+        color: #ffd76a;
+    }
+
+    pre.codeblock ::selection {
+        background: rgba(120, 160, 255, 0.25);
+    }
+    figure.codeblock.program-output pre.codeblock {
+        padding: 0.75em 1em;
+    }
+
+    figure.codeblock.program-output pre.codeblock > code {
+        padding: 0;
+    }
+
+    figure.codeblock.program-output pre.codeblock {
+        line-height: 1.25;
+    }
+    )";
+    outputFile << "</style>\n</head>\n<body>\n";
     outputFile << htmlOutput;
-    outputFile << "</body>\n";
-    outputFile << "</html>\n";
+    outputFile << "</body></html>";
     // Close the file
     outputFile.close();
 
-
     cout << "HTML file 'output.html' generated successfully." << endl;
 }
-
 
 void HTMLConverter::convertBold(string& line)
 {
@@ -260,17 +336,38 @@ void HTMLConverter::restoreCodeBlocks(string& s) {
     }
 }
 //--
-void HTMLConverter::processCodeblock(string& cb) {
-    string html_str;
+// this is a helper for processCodeblock
+// it exists so I can put code in html safely
+static string htmlEscape(const string& s) {
+    string out;
+    out.reserve(s.size());
+    for (char c : s) {
+        switch (c) {
+            case '&': out += "&amp;";  break;
+            case '<': out += "&lt;";   break;
+            case '>': out += "&gt;";   break;
+            case '"': out += "&quot;"; break;
+            default:  out += c;        break;
+        }
+    }
+    return out;
+}
 
-    // grab first line for metadata e.g. file="", highlights="", etc
+void HTMLConverter::processCodeblock(string& cb) {
+    
+    if (cb.find("program-output")) {
+        handleProgramOutput(cb);
+        return;
+    }
+    
+    // grab first line for metadata e.g. file="", highlight=""
     size_t first_newline = cb.find('\n');
     if (first_newline == string::npos) {
         cb.clear(); // bad codeblock
         return;
     }
+    
     string header = cb.substr(3, first_newline - 3); // header minus ```
-
     // remove opening ```
     cb = cb.substr(first_newline + 1);
 
@@ -280,26 +377,268 @@ void HTMLConverter::processCodeblock(string& cb) {
         cb.erase(closing_backticks);
     }
 
-    // for visualization/explanation of this pattern, see: regexr.com/8jelu
-    static const regex file_pattern(R"(file=\"(.*?)\")");
-    smatch m; // smatch is an object that stores matches from regex_search()
+    // split into lines
+    vector<string> lines;
+    string line;
+    stringstream ss(cb);
+    while (getline(ss, line)) {
+        lines.push_back(line);
+    }
 
-    if (regex_search(header, m, file_pattern)) { // if it has a filename specifier
-        html_str =
+    // highlight flags (one per line)
+    vector<bool> highlight(lines.size(), false);
+
+    // handles [< ... >] whole-line syntax ----
+    for (size_t i = 0; i < lines.size(); ++i) {
+        string& raw = lines[i];
+        if (raw.size() >= 4 and
+            raw.rfind("[<", 0) == 0 and
+            raw.substr(raw.size() - 2) == ">]") {
+
+            highlight[i] = true;
+            raw = raw.substr(2, raw.size() - 4); // strip [< and >]
+        }
+    }
+
+    // handles highlight="3-5,8" header syntax
+    static const regex highlight_pattern(R"(highlight=\"(.*?)\")");
+    smatch hm;
+    if (regex_search(header, hm, highlight_pattern)) {
+        string spec = hm[1].str();
+        string token;
+        stringstream hs(spec);
+
+        while (getline(hs, token, ',')) {
+            size_t dash = token.find('-');
+            if (dash == string::npos) {
+                int n = stoi(token);
+                if (n >= 1 and (size_t)n <= lines.size()) {
+                    highlight[n - 1] = true;
+                }
+            } 
+            else {
+                int a = stoi(token.substr(0, dash));
+                int b = stoi(token.substr(dash + 1));
+                if (a > b) {
+                    swap(a, b);
+                }
+                for (int n = a; n <= b; ++n) {
+                    if (n >= 1 and static_cast<size_t>(n) <= lines.size()) {
+                        highlight[n - 1] = true;
+                    }
+                }
+            }
+        }
+    }
+
+    string code_html;
+    code_html += "<pre class=\"codeblock\"><code>\n";
+
+    for (size_t i = 0; i < lines.size(); ++i) {
+        string classes = "line";
+        if (highlight[i]) {
+            classes += " highlight";
+        }
+
+        code_html += "<span class=\"" + classes + "\">"
+                   + htmlEscape(lines[i]) +
+                   "</span>\n";
+    }
+
+    code_html += "</code></pre>\n";
+
+    // filename handler
+    static const regex file_pattern(R"(file=\"(.*?)\")");
+    smatch m;
+    if (regex_search(header, m, file_pattern)) {
+        cb =
             "<figure class=\"codeblock\">\n"
-            "  <figcaption class=\"codeblock__title\">" + m[1].str() + "</figcaption>\n"
-            "  <pre><code>\n" +
-            cb +
-            "\n  </code></pre>\n"
-            "</figure>";
+            "<figcaption class=\"codeblock__title\">" + htmlEscape(m[1].str()) + "</figcaption>\n" +
+            code_html +
+            "</figure>\n";
+    } 
+    else {
+        cb = code_html;
     }
-    else { // no filename specifier
-        html_str =
-            "<pre class=\"codeblock\"><code>\n" +
-            cb +
-            "\n</code></pre>";
+}
+
+void HTMLConverter::convertLists(string& text)
+{
+    string result;
+    string line;
+    stringstream ss(text);
+    
+    vector<string> listStack;  // stack to track open list tags
+    vector<int> indentStack;   // stack to track actual indents
+
+    // since markdown is very flexible with indentation, this tracks what the text is using to avoid guessing
+    int indentUnit = 0;
+    
+    // regex patterns for list items
+    static const regex unorderedPattern(R"(^(\s*)([-*+]) (.+)$)");
+    static const regex orderedPattern(R"(^(\s*)(\d+)\. (.+)$)");
+    
+    while (getline(ss, line))
+    {
+        smatch match;
+        bool isUnorderedItem = false;
+        bool isOrderedItem = false;
+        int spaceCount = 0;
+        size_t contentStart = 0;
+        
+        // check for unordered list marker
+        if (regex_match(line, match, unorderedPattern))
+        {
+            isUnorderedItem = true;
+            spaceCount = match[1].length();
+            contentStart = match.position(3);
+        }
+        // check for ordered list marker
+        else if (regex_match(line, match, orderedPattern))
+        {
+            isOrderedItem = true;
+            spaceCount = match[1].length();
+            contentStart = match.position(3);
+        }
+        else
+        {
+            // count leading spaces for non-list lines
+            while (spaceCount < (int)line.length() && line[spaceCount] == ' ')
+            {
+                spaceCount++;
+            }
+        }
+        
+        // is list ordered or unordered
+        string itemListType = "";
+        if (isUnorderedItem)
+        {
+            itemListType = "ul";
+        }
+        else if (isOrderedItem)
+        {
+            itemListType = "ol";
+        }
+        
+        if (itemListType != "")
+        {
+            // get indent unit from first line
+            if (indentUnit == 0 && !indentStack.empty() && spaceCount > indentStack.back())
+            {
+                indentUnit = spaceCount - indentStack.back();
+            }
+            
+            // close lists that are at deeper indent levels than current
+            while (!indentStack.empty() && indentStack.back() > spaceCount)
+            {
+                indentStack.pop_back();
+                string closingTag = listStack.back();
+                listStack.pop_back();
+                for (int i = 0; i < (int)indentStack.size(); i++)
+                {
+                    result += "  ";
+                }
+                result += "</" + closingTag + ">\n";
+            }
+            
+            // check if we need to open a new list
+            if (indentStack.empty() || spaceCount > indentStack.back())
+            {
+                // opening a nested list
+                for (int i = 0; i < (int)indentStack.size(); i++)
+                {
+                    result += "  ";
+                }
+                result += "<" + itemListType + ">\n";
+                listStack.push_back(itemListType);
+                indentStack.push_back(spaceCount);
+            }
+            else if (spaceCount == indentStack.back() && !listStack.empty() && listStack.back() != itemListType)
+            {
+                // list type changed at same level
+                for (int i = 0; i < (int)indentStack.size() - 1; i++)
+                {
+                    result += "  ";
+                }
+                result += "</" + listStack.back() + ">\n";
+                listStack.pop_back();
+                indentStack.pop_back();
+                
+                for (int i = 0; i < (int)indentStack.size(); i++)
+                {
+                    result += "  ";
+                }
+                result += "<" + itemListType + ">\n";
+                listStack.push_back(itemListType);
+                indentStack.push_back(spaceCount);
+            }
+            
+            // add the list item
+            for (int i = 0; i < (int)indentStack.size(); i++)
+            {
+                result += "  ";
+            }
+            result += "<li>" + line.substr(contentStart) + "</li>\n";
+        }
+        else
+        {
+            // not a list item - close any open lists
+            while (!indentStack.empty())
+            {
+                indentStack.pop_back();
+                string closingTag = listStack.back();
+                listStack.pop_back();
+                for (int i = 0; i < (int)indentStack.size(); i++)
+                {
+                    result += "  ";
+                }
+                result += "</" + closingTag + ">\n";
+            }
+            result += line + "\n";
+        }
     }
-    cb = html_str;
+    
+    // close any remaining open lists
+    while (!indentStack.empty())
+    {
+        indentStack.pop_back();
+        string closingTag = listStack.back();
+        listStack.pop_back();
+        for (int i = 0; i < (int)indentStack.size(); i++)
+        {
+            result += "  ";
+        }
+        result += "</" + closingTag + ">\n";
+    }
+    
+    text = result;
+}
+
+void HTMLConverter::handleProgramOutput(string& cb) {
+    // find first newline (end of ```program-output line)
+    size_t first_newline = cb.find('\n');
+    if (first_newline == string::npos) {
+        cb.clear();
+        return;
+    }
+
+    // strip opening ``` line
+    cb = cb.substr(first_newline + 1);
+
+    // strip closing ```
+    size_t closing_backticks = cb.rfind("```");
+    if (closing_backticks != string::npos) {
+        cb.erase(closing_backticks);
+    }
+
+    // return HTML conversion through parameter
+    cb =
+        "<figure class=\"codeblock program-output\">\n"
+        "<figcaption class=\"codeblock__title\">Program Output</figcaption>\n"
+        "<pre class=\"codeblock\"><code>\n"
+        + htmlEscape(cb) +
+        "\n</code></pre>\n"
+        "</figure>\n";
 }
 void HTMLConverter::convertParagraphs(string& line)
 {

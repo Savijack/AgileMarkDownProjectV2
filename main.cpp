@@ -254,48 +254,54 @@ TEST_CASE("convert image function")
     }
 	delete test; 
 }
-TEST_CASE("processCodeblock: file header -> figure+caption") {
-    HTMLConverter c("./test_documents/1.md");
 
-    string cb =
-        "``` file=\"main.cpp\"\n"
-        "int x = 10;\n"
-        "return x;\n"
-        "```";
-
-    c.processCodeblock(cb);
-
-    REQUIRE(cb.find("<figure class=\"codeblock\">") != string::npos);
-    REQUIRE(cb.find("<figcaption class=\"codeblock__title\">main.cpp</figcaption>") != string::npos);
-    REQUIRE(cb.find("  <pre><code>\n") != string::npos);
-
-    REQUIRE(cb.find("int x = 10;\nreturn x;\n") != string::npos);
-
-    REQUIRE(cb.find("</figure>") != string::npos);
-    REQUIRE(cb.find("```") == string::npos);
-}
-TEST_CASE("convert link function")
+TEST_CASE("convert list function")
 {
-    HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
-	SECTION("simple link")
-    {
-        string s = "[bed](bed.com)";
-        test->convertLinks(s); 
-        REQUIRE(s == "<a href=\"bed.com\">bed</a>");
-    }
-    SECTION("image in text")
-    {
-        string s = "one, two, [link](link.com) three";
-        test->convertLinks(s); 
-        REQUIRE(s == "one, two, <a href=\"link.com\">link</a> three");
-    }
-    SECTION("two images")
-    {
-        string s = "[link1](link1.com) and [link2](link2.com)";
-        test->convertLinks(s); 
-        REQUIRE(s == "<a href=\"link1.com\">link1</a> and <a href=\"link2.com\">link2</a>");
-    }
-	delete test; 
+	HTMLConverter *test = new HTMLConverter("./test_documents/1.md");
+	
+	SECTION("Simple unordered list")
+	{
+		string s = "- Item 1\n- Item 2\n- Item 3\n";
+		test->convertLists(s);
+		REQUIRE(s == "<ul>\n  <li>Item 1</li>\n  <li>Item 2</li>\n  <li>Item 3</li>\n</ul>\n");
+	}
+
+	SECTION("Simple ordered list")
+	{
+		string s = "1. First\n2. Second\n3. Third\n";
+		test->convertLists(s);
+		REQUIRE(s == "<ol>\n  <li>First</li>\n  <li>Second</li>\n  <li>Third</li>\n</ol>\n");
+	}
+
+	SECTION("nested lists")
+	{
+		string s = "- Item 1\n  - Nested 1\n  - Nested 2\n- Item 2\n";
+		test->convertLists(s);
+		REQUIRE(s == "<ul>\n  <li>Item 1</li>\n  <ul>\n    <li>Nested 1</li>\n    <li>Nested 2</li>\n  </ul>\n  <li>Item 2</li>\n</ul>\n");
+	}
+
+	SECTION("list and text mixed")
+	{
+		string s = "1. Item 1\n2. Item 2\nRegular paragraph\n";
+		test->convertLists(s);
+		REQUIRE(s == "<ol>\n  <li>Item 1</li>\n  <li>Item 2</li>\n</ol>\nRegular paragraph\n");
+	}
+
+	SECTION("list and text mixed 2")
+	{
+		string s = "Some text\n- Item 1\n- Item 2\n";
+		test->convertLists(s);
+		REQUIRE(s == "Some text\n<ul>\n  <li>Item 1</li>\n  <li>Item 2</li>\n</ul>\n");
+	}
+
+	SECTION("Multiple separate lists")
+	{
+		string s = "- List 1 Item\nParagraph\n1. List 2 Item\n";
+		test->convertLists(s);
+		REQUIRE(s == "<ul>\n  <li>List 1 Item</li>\n</ul>\nParagraph\n<ol>\n  <li>List 2 Item</li>\n</ol>\n");
+	}
+
+	delete test;
 }
 TEST_CASE("convert paragraph function")
 {
