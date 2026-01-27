@@ -318,15 +318,11 @@ TEST_CASE("convert paragraph function")
         test->convertParagraphs(s);
         REQUIRE(s == "<p>this is paragraph one.</p><p>this is paragraph two.</p><p>this is paragraph three.</p><p>this is paragraph four.</p>");
     }
-    SECTION("ignores a single 'new line' operator")
+    SECTION("ignores when starts with two new lines")
     {
-        string s = "this is\nparagraph one.";
+        string s = "\n\nthis is paragraph one.\n\nthis is paragraph two.";
         test->convertParagraphs(s);
-        REQUIRE(s == "this is paragraph one.");
-    }
-    SECTION("starts with two new lines")
-    {
-
+        REQUIRE(s == "<p>this is paragraph one.</p><p>this is paragraph two.</p>");
     }
     delete test;
 }

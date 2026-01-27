@@ -32,6 +32,7 @@ void HTMLConverter::convert(const string& outputFilepath)
     convertItalics(markdownContent);
     convertImages(markdownContent);
     convertLinks(markdownContent);
+    convertParagraphs(markdownContent);
 
     for (auto& cb : codeblocks) {
         processCodeblock(cb);
