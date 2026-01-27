@@ -212,3 +212,94 @@ TEST_CASE("separateCodeBlocks: no code blocks") {
     REQUIRE(test.codeblocks.empty());
     REQUIRE(s == original);
 }
+
+TEST_CASE("convert italic function")
+{
+	HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
+	SECTION("Test single italic")
+	{
+		string s = "*hello*";
+		test->convertItalics(s);
+		REQUIRE(s == "<em>hello</em>");
+	}
+	SECTION("Test multiple italics")
+	{
+		string s = "*one* and *two*";
+		test->convertItalics(s);
+		REQUIRE(s == "<em>one</em> and <em>two</em>");
+	}
+	delete test; 
+}
+
+TEST_CASE("convert image function")
+{
+    HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
+	SECTION("simple image")
+    {
+        string s = "![bed](bed.png)";
+        test->convertImages(s); 
+        REQUIRE(s == "<img src=\"bed.png\" alt=\"bed\">");
+    }
+    SECTION("image in text")
+    {
+        string s = "one, two, ![image](image.jpg) three";
+        test->convertImages(s); 
+        REQUIRE(s == "one, two, <img src=\"image.jpg\" alt=\"image\"> three");
+    }
+    SECTION("two images")
+    {
+        string s = "![image1](image1.jpg) and ![image2](image2.jpg)";
+        test->convertImages(s); 
+        REQUIRE(s == "<img src=\"image1.jpg\" alt=\"image1\"> and <img src=\"image2.jpg\" alt=\"image2\">");
+    }
+	delete test; 
+}
+
+TEST_CASE("convert list function")
+{
+	HTMLConverter *test = new HTMLConverter("./test_documents/1.md");
+	
+	SECTION("Simple unordered list")
+	{
+		string s = "- Item 1\n- Item 2\n- Item 3\n";
+		test->convertLists(s);
+		REQUIRE(s == "<ul>\n  <li>Item 1</li>\n  <li>Item 2</li>\n  <li>Item 3</li>\n</ul>\n");
+	}
+
+	SECTION("Simple ordered list")
+	{
+		string s = "1. First\n2. Second\n3. Third\n";
+		test->convertLists(s);
+		REQUIRE(s == "<ol>\n  <li>First</li>\n  <li>Second</li>\n  <li>Third</li>\n</ol>\n");
+	}
+
+	SECTION("nested lists")
+	{
+		string s = "- Item 1\n  - Nested 1\n  - Nested 2\n- Item 2\n";
+		test->convertLists(s);
+		REQUIRE(s == "<ul>\n  <li>Item 1</li>\n  <ul>\n    <li>Nested 1</li>\n    <li>Nested 2</li>\n  </ul>\n  <li>Item 2</li>\n</ul>\n");
+	}
+
+	SECTION("list and text mixed")
+	{
+		string s = "1. Item 1\n2. Item 2\nRegular paragraph\n";
+		test->convertLists(s);
+		REQUIRE(s == "<ol>\n  <li>Item 1</li>\n  <li>Item 2</li>\n</ol>\nRegular paragraph\n");
+	}
+
+	SECTION("list and text mixed 2")
+	{
+		string s = "Some text\n- Item 1\n- Item 2\n";
+		test->convertLists(s);
+		REQUIRE(s == "Some text\n<ul>\n  <li>Item 1</li>\n  <li>Item 2</li>\n</ul>\n");
+	}
+
+	SECTION("Multiple separate lists")
+	{
+		string s = "- List 1 Item\nParagraph\n1. List 2 Item\n";
+		test->convertLists(s);
+		REQUIRE(s == "<ul>\n  <li>List 1 Item</li>\n</ul>\nParagraph\n<ol>\n  <li>List 2 Item</li>\n</ol>\n");
+	}
+
+	delete test;
+}
