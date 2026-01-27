@@ -122,14 +122,13 @@ void HTMLConverter::outputToFile(const string& filepath) {
         background: rgba(120, 160, 255, 0.25);
     }
     figure.codeblock.program-output pre.codeblock {
-        padding: 0.75em 1em;   /* space on all sides */
+        padding: 0.75em 1em;
     }
 
     figure.codeblock.program-output pre.codeblock > code {
-        padding: 0;           /* keep code tight inside pre */
+        padding: 0;
     }
 
-    /* program output has no line spans, so give it breathing room */
     figure.codeblock.program-output pre.codeblock {
         line-height: 1.25;
     }
