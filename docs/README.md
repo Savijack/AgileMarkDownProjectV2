@@ -3,12 +3,12 @@
 ## Project Description
 
 This program is designed to take in a MarkDown file and convert the text to HTML. The project will be able to convert the following traditional MarkDown syntax into HTML:
-
 - Headers
 - Paragraphs
 - Italics
 - Bold
-- Lists
+- Unordered Lists
+- Ordered Lists
 - Links
 - Images
 - Single Lines of Code
@@ -16,7 +16,6 @@ This program is designed to take in a MarkDown file and convert the text to HTML
 - Horizontal Lines
 
 Beyond traditional Markdown symbols, the program will convert these custom syntax into HTML:
-
 - Code with File Name
 - Highlight Code
 - Multiline Highlight
