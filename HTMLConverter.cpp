@@ -355,7 +355,7 @@ static string htmlEscape(const string& s) {
 
 void HTMLConverter::processCodeblock(string& cb) {
     
-    if (cb.find("program-output")) {
+    if (cb.find("program-output") != string::npos) {
         handleProgramOutput(cb);
         return;
     }
