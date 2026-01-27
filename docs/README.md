@@ -25,7 +25,7 @@ Once the syntax is converted to HTML, the string will be sent into a new HTML fi
 
 ## Install Dependencies
 
-A C++ compiler such as Microsoft Visual C++ Compiler is necessary to run this code.
+A C++ compiler such as Microsoft Visual C++ Compiler is necessary to run this code. Front end functionality will be added in a future update.
 
 ## How To Run The Application
 
