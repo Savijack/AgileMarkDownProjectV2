@@ -26,6 +26,7 @@ void HTMLConverter::convert(const string& outputFilepath)
     // this should be one of the first things called to make things easier for the other functions to parse
     separateCodeBlocks(markdownContent);
 
+    convertTables(markdownContent);
     convertLists(markdownContent);
     convertLine(markdownContent);
     convertHeaders(markdownContent);
@@ -640,6 +641,111 @@ void HTMLConverter::handleProgramOutput(string& cb) {
         "\n</code></pre>\n"
         "</figure>\n";
 }
+
+void HTMLConverter::convertTables(string& text)
+{
+    string result;
+    string line;
+    stringstream ss(text);
+    
+    // regex pattern for table block start: :::table cols=[...][...][...]
+    static const regex tableStartPattern(R"(^(\s*):::table\s+cols=(.+)$)");
+    // regex pattern for table row: [item1][item2][item3]
+    static const regex tableRowPattern(R"(^(\s*)\[(.+)\](\[.+\])*$)");
+    // regex pattern for table block end: :::
+    static const regex tableEndPattern(R"(^(\s*):::$)");
+    
+    while (getline(ss, line))
+    {
+        smatch match;
+        bool isTableStart = false;
+        bool isTableEnd = false;
+        bool isTableRow = false;
+        
+        // check for table start
+        if (regex_match(line, match, tableStartPattern))
+        {
+            isTableStart = true;
+        }
+        // check for table end
+        else if (regex_match(line, match, tableEndPattern))
+        {
+            isTableEnd = true;
+        }
+        // check for table row
+        else if (regex_match(line, match, tableRowPattern))
+        {
+            isTableRow = true;
+        }
+        
+        if (isTableStart)
+        {
+            // get column headers
+            string colsStr = match[2].str();
+            vector<string> columns;
+            
+            static const regex colPattern(R"(\[([^\]]+)\])");
+            smatch colMatch;
+            string::const_iterator searchStart(colsStr.cbegin());
+            
+            while (regex_search(searchStart, colsStr.cend(), colMatch, colPattern))
+            {
+                columns.push_back(colMatch[1].str());
+                searchStart = colMatch.suffix().first;
+            }
+            
+            // start table
+            result += "<table>\n";
+            result += "  <thead>\n";
+            result += "    <tr>\n";
+            
+            for (const auto& col : columns)
+            {
+                result += "      <th>" + col + "</th>\n";
+            }
+            
+            result += "    </tr>\n";
+            result += "  </thead>\n";
+            result += "  <tbody>\n";
+        }
+        else if (isTableEnd)
+        {
+            // close table
+            result += "  </tbody>\n";
+            result += "</table>\n";
+        }
+        else if (isTableRow)
+        {
+            // get row items
+            vector<string> items;
+            static const regex itemPattern(R"(\[([^\]]+)\])");
+            smatch itemMatch;
+            string::const_iterator searchStart(line.cbegin());
+            
+            while (regex_search(searchStart, line.cend(), itemMatch, itemPattern))
+            {
+                items.push_back(itemMatch[1].str());
+                searchStart = itemMatch.suffix().first;
+            }
+            
+            // add row
+            result += "    <tr>\n";
+            for (const auto& item : items)
+            {
+                result += "      <td>" + item + "</td>\n";
+            }
+            result += "    </tr>\n";
+        }
+        else
+        {
+            // non-table line
+            result += line + "\n";
+        }
+    }
+    
+    text = result;
+}
+
 void HTMLConverter::convertParagraphs(string& line)
 {
     string retVal = "";

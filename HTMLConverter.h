@@ -26,6 +26,7 @@ public:
    void convertImages(string& line);
    void convertLinks(string& line);
    void convertLists(string& text);
+   void convertTables(string& text);
    void convertParagraphs(string& line);
 
    int hasHeader(const string& line);

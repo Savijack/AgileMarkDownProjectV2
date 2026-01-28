@@ -10,7 +10,7 @@ using namespace std;
 //--
 TEST_CASE("Check creating output file")  
 {
-	HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
+	HTMLConverter *test = new HTMLConverter("./test_documents/4.md");
 	SECTION("Test Document 1")
 	{
 		test->convert("output.html");
@@ -303,6 +303,42 @@ TEST_CASE("convert list function")
 
 	delete test;
 }
+
+TEST_CASE("convert table function")
+{
+	HTMLConverter *test = new HTMLConverter("./test_documents/4.md");
+	
+	SECTION("Table with three columns")
+	{
+		string s = ":::table cols=[Name][Age][City]\n[Alice][30][NYC]\n[Bob][25][LA]\n:::\n";
+		test->convertTables(s);
+		REQUIRE(s == "<table>\n  <thead>\n    <tr>\n      <th>Name</th>\n      <th>Age</th>\n      <th>City</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>Alice</td>\n      <td>30</td>\n      <td>NYC</td>\n    </tr>\n    <tr>\n      <td>Bob</td>\n      <td>25</td>\n      <td>LA</td>\n    </tr>\n  </tbody>\n</table>\n");
+	}
+
+	SECTION("Table with two columns")
+	{
+		string s = ":::table cols=[metric][value]\n[build time][12s]\n[test time][48s]\n:::\n";
+		test->convertTables(s);
+		REQUIRE(s == "<table>\n  <thead>\n    <tr>\n      <th>metric</th>\n      <th>value</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>build time</td>\n      <td>12s</td>\n    </tr>\n    <tr>\n      <td>test time</td>\n      <td>48s</td>\n    </tr>\n  </tbody>\n</table>\n");
+	}
+
+	SECTION("Table with single row")
+	{
+		string s = ":::table cols=[Header1][Header2]\n[Data1][Data2]\n:::\n";
+		test->convertTables(s);
+		REQUIRE(s == "<table>\n  <thead>\n    <tr>\n      <th>Header1</th>\n      <th>Header2</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>Data1</td>\n      <td>Data2</td>\n    </tr>\n  </tbody>\n</table>\n");
+	}
+
+	SECTION("Table with text")
+	{
+		string s = "Some text before\n:::table cols=[A][B]\n[1][2]\n:::\nSome text after\n";
+		test->convertTables(s);
+		REQUIRE(s == "Some text before\n<table>\n  <thead>\n    <tr>\n      <th>A</th>\n      <th>B</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>1</td>\n      <td>2</td>\n    </tr>\n  </tbody>\n</table>\nSome text after\n");
+	}
+
+	delete test;
+}
+
 TEST_CASE("convert paragraph function")
 {
     HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
