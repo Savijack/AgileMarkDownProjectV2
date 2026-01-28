@@ -2,11 +2,11 @@
 
 ## Software Overview
 
-Serene Pathfinder's Agile Markdown Converter allows the user to input a Markdown file and convert its syntax to HTML. All our program needs is the path of the Markdown file you wish to convert to HTML. 
+Serene Pathfinder's Agile Markdown Converter allows the user to input a Markdown (.md) file and convert its syntax to HTML. The syntax will then be placed in a new HTML file accessible by the user. All our program needs is the path of the Markdown file to convert to HTML. 
 
 ## What is Markdown
 
-Markdown is a markup language that is designed to add formatting elements to a text document. The Agile Markdown Converter uses both traditional and custom Markdown syntax To format a text file with Markdown, use the syntax below:
+Markdown is a markup language that is designed to add formatting elements to a text document. Special characters and syntax are used to structure a document according to user specifications. The Agile Markdown Converter uses both traditional and custom Markdown syntax to achieve this. To format a text file with the Agile Markdown Converter, use the listed syntax below:
 
 - Headers (1-6 #'s)
     + Ex: # Header Text

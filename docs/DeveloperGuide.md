@@ -19,6 +19,36 @@ git checkout -b feature/your-feature-name
 ### Step 3: Write Tests
 Write tests that fail initially, but will pass when your feature is implemented. Follow the test-driven development (TDD) approach.
 
+#### How To Run Tests
+
+1. Create a MarkDown file containing the MarkDown syntax that will be tested.
+2. Use a separate .cpp file to perform tests.
+3. Ensure test cases cover single and multiple instances of MarkDown syntax.
+4. Test cases should have formatting similar to the following example:
+```
+TEST_CASE("Convert Italics Test Cases")
+{
+    HTMLConverter * test = new HTMLConverter("./test_documents/1.md");
+    {
+        string s = "*hello*";
+        test->convertItalics(s);
+        REQUIRE(s == "<em>hello</em>");
+    }
+
+    {
+        string s = "this is *italic* text";
+        test->convertItalics(s);
+        REQUIRE(s == "this is <em>italic</em> text");
+    }
+
+    {
+        string s = "*one* *two*";
+        test->convertItalics(s);
+        REQUIRE(s == "<em>one</em> <em>two</em>");
+    }
+}
+```
+
 ### Step 4: Implement Feature
 Implement the feature or make the required changes to satisfy the tests and requirements.
 
