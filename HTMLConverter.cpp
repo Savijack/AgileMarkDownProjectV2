@@ -30,8 +30,7 @@ void HTMLConverter::convert(const string& outputFilepath)
     convertLists(markdownContent);
     convertLine(markdownContent);
     convertHeaders(markdownContent);
-    convertBold(markdownContent);
-    convertItalics(markdownContent);
+    convertBoldAndItalics(markdownContent);
     convertImages(markdownContent);
     convertLinks(markdownContent);
     convertParagraphs(markdownContent);
@@ -145,26 +144,61 @@ void HTMLConverter::outputToFile(const string& filepath) {
     cout << "HTML file 'output.html' generated successfully." << endl;
 }
 
-void HTMLConverter::convertBold(string& line)
+void HTMLConverter::convertBoldAndItalics(string& line)
 {
+    string retVal = "";
     bool inBold = false;
+    bool inItalics = false;
+    
     for (size_t i = 0; i < line.size(); i++)
     {
-        if (line[i] == '*' && line[i+1] == '*') // looking for **
+        if (line[i] == '*' && line[i+1] == '*' && line[i + 2] == '*') // looks for triple ***
+        {
+            if (inBold && inItalics) // handles bold and italic endings for *** case
+            {
+                retVal += "</em></b>";
+                inBold = false;
+                inItalics = false;
+            }
+            else // handles bold and italic beginnings for *** case
+            {
+                retVal += "<b><em>";
+                inBold = true;
+                inItalics = true;
+            }
+            i += 2;
+        }
+        else if (line[i] == '*' && line[i+1] == '*') // looking for **
         {
             if (inBold)
             {
-                line.replace(i, 2, "</b>"); // handles the ending **
-                inBold = false;
+                retVal += "</b>"; // handles bold ending
             }
-            else 
+            else
             {
-                line.replace(i, 2, "<b>");  // handles the starting **
-                inBold = true; 
+                retVal += "<b>";  // handles bold beginning
             }
+            inBold = !inBold;
+            i++;
+        }
+        else if (line[i] == '*') // looking for *
+        {
+            if (inItalics)
+            {
+                retVal += "</em>";  // handles italics ending
+            }
+            else
+            {
+                retVal += "<em>";   // handles italics beginning
+            }
+            inItalics = !inItalics;
+        }
+        else
+        {
+            retVal += line[i];
         }
     }
-    std::cout << "HTML file 'output.html' generated successfully." << std::endl;
+    line = retVal;
 }
 //--
 void HTMLConverter::convertLine(string& s) {
@@ -206,30 +240,6 @@ void HTMLConverter::convertHeaders(string& text) {
     }
 
     text = result;
-}
-
-void HTMLConverter::convertItalics(string& line)
-{
-    string retVal = "";
-    bool inItalics = false;
-
-    //going through the string, checking each char for '*', and replacing with proper format when found
-    for (size_t i = 0; i < line.length(); i++) {
-        if (line[i] == '*' && line[i+1] != '*') {
-            if (inItalics) {
-                retVal += "</em>"; 
-            }
-            else {
-                retVal += "<em>";
-            }
-            inItalics = !inItalics; 
-        }
-        else {
-            retVal += line[i]; 
-        }
-    }
-
-    line = retVal;
 }
 
 void HTMLConverter::convertImages(string& line)

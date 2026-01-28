@@ -24,37 +24,46 @@ TEST_CASE("Check creating output file")
 	delete test;
 }
 
-TEST_CASE("Bold Conversion")
+TEST_CASE("Bold and Italic Conversion")
 {
 	HTMLConverter *test = new HTMLConverter("./test_documents/1.md");
 	
 	SECTION("Single Bold Word")
 	{
-		string input = "Hello **World**!";
-		test->convertBold(input);
-		REQUIRE(input == "Hello <b>World</b>!");
+		string s = "Hello **World**!";
+		test->convertBoldAndItalics(s);
+		REQUIRE(s == "Hello <b>World</b>!");
 	}
-
-	SECTION("Multiple Bold Words")
-	{
-		string input = "Hello **World I am** here!";
-		test->convertBold(input);
-		REQUIRE(input == "Hello <b>World I am</b> here!");
-	}
-
 	SECTION("Separated Bold Words")
 	{
-		string input = "Hello **World** I am **here!**";
-		test->convertBold(input);
-		REQUIRE(input == "Hello <b>World</b> I am <b>here!</b>");
+		string s = "Hello **World** I am **here!**";
+		test->convertBoldAndItalics(s);
+		REQUIRE(s == "Hello <b>World</b> I am <b>here!</b>");
 	}
-
-	SECTION("Touching Bold Words")
+	SECTION("single italic")
 	{
-		string input = "Hello **World** **I** am **here!**";
-		test->convertBold(input);
-		REQUIRE(input == "Hello <b>World</b> <b>I</b> am <b>here!</b>");
+		string s = "*hello*";
+		test->convertBoldAndItalics(s);
+		REQUIRE(s == "<em>hello</em>");
 	}
+	SECTION("separated italics")
+	{
+		string s = "*one* and *two*";
+		test->convertBoldAndItalics(s);
+		REQUIRE(s == "<em>one</em> and <em>two</em>");
+	}
+    SECTION("single bold and single italic")
+    {
+        string s = "*one* and **two**";
+        test->convertBoldAndItalics(s);
+        REQUIRE(s == "<em>one</em> and <b>two</b>");
+    }
+    SECTION("combined bold and italic word")
+    {
+        string s = "Oh ***hello*** there";
+        test->convertBoldAndItalics(s);
+        REQUIRE(s == ("Oh <b><em>hello</em></b> there"));
+    }    
 	delete test;
 }
 TEST_CASE("convertLine testcases")
@@ -211,24 +220,6 @@ TEST_CASE("separateCodeBlocks: no code blocks") {
 
     REQUIRE(test.codeblocks.empty());
     REQUIRE(s == original);
-}
-
-TEST_CASE("convert italic function")
-{
-	HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
-	SECTION("Test single italic")
-	{
-		string s = "*hello*";
-		test->convertItalics(s);
-		REQUIRE(s == "<em>hello</em>");
-	}
-	SECTION("Test multiple italics")
-	{
-		string s = "*one* and *two*";
-		test->convertItalics(s);
-		REQUIRE(s == "<em>one</em> and <em>two</em>");
-	}
-	delete test; 
 }
 
 TEST_CASE("convert image function")
