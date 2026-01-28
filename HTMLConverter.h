@@ -21,12 +21,11 @@ public:
    
    void convertLine(string& s);
    void convertHeaders(string& s);
-   void convertImages(string& line);
-   void convertLinks(string& line);
    void convertLists(string& text);
    void convertTables(string& text);
    void convertParagraphs(string& line);
    void convertBoldAndItalics(string& line);
+   void convertImagesAndLinks(string&line); 
 
    int hasHeader(const string& line);
    

@@ -222,26 +222,44 @@ TEST_CASE("separateCodeBlocks: no code blocks") {
     REQUIRE(s == original);
 }
 
-TEST_CASE("convert image function")
+TEST_CASE("convert image and links function")
 {
     HTMLConverter *test = new HTMLConverter("./test_documents/2.md");
 	SECTION("simple image")
     {
         string s = "![bed](bed.png)";
-        test->convertImages(s); 
+        test->convertImagesAndLinks(s); 
         REQUIRE(s == "<img src=\"bed.png\" alt=\"bed\">");
     }
     SECTION("image in text")
     {
         string s = "one, two, ![image](image.jpg) three";
-        test->convertImages(s); 
+        test->convertImagesAndLinks(s); 
         REQUIRE(s == "one, two, <img src=\"image.jpg\" alt=\"image\"> three");
     }
     SECTION("two images")
     {
         string s = "![image1](image1.jpg) and ![image2](image2.jpg)";
-        test->convertImages(s); 
+        test->convertImagesAndLinks(s); 
         REQUIRE(s == "<img src=\"image1.jpg\" alt=\"image1\"> and <img src=\"image2.jpg\" alt=\"image2\">");
+    }
+    SECTION("simple link")
+    {
+        string s = "[link](link.com)";
+        test->convertImagesAndLinks(s); 
+        REQUIRE(s == "<a href=\"link.com\">link</a>");
+    }
+    SECTION("image in text")
+    {
+        string s = "one, two, [link](link.com) three";
+        test->convertImagesAndLinks(s); 
+        REQUIRE(s == "one, two, <a href=\"link.com\">link</a> three");
+    }
+    SECTION("one link and photo")
+    {
+        string s = "[link1](link1.com) and ![pic1](pic1.png)";
+        test->convertImagesAndLinks(s); 
+        REQUIRE(s == "<a href=\"link1.com\">link1</a> and <img src=\"pic1.png\" alt=\"pic1\">");
     }
 	delete test; 
 }

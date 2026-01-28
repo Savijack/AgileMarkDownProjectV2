@@ -31,9 +31,8 @@ void HTMLConverter::convert(const string& outputFilepath)
     convertLine(markdownContent);
     convertHeaders(markdownContent);
     convertBoldAndItalics(markdownContent);
-    convertImages(markdownContent);
-    convertLinks(markdownContent);
     convertParagraphs(markdownContent);
+    convertImagesAndLinks(markdownContent); 
 
     for (auto& cb : codeblocks) {
         processCodeblock(cb);
@@ -242,7 +241,7 @@ void HTMLConverter::convertHeaders(string& text) {
     text = result;
 }
 
-void HTMLConverter::convertImages(string& line)
+void HTMLConverter::convertImagesAndLinks(string&line)
 {
     string retVal = ""; 
 
@@ -276,18 +275,7 @@ void HTMLConverter::convertImages(string& line)
                 }
             }
         }
-        retVal += line[i]; 
-    }
-    line = retVal; 
-}
-void HTMLConverter::convertLinks(string& line)
-{
-    string retVal = ""; 
-
-    //go through string
-    for(size_t i=0; i<line.length(); i++)
-    {
-        if(i+1 < line.length() && line[i] == '[') //checking for link formatting
+        else if(i+1 < line.length() && line[i] == '[') //checking for link formatting
         {
             //finding the indexes of the alt/description text
             size_t text = i+1;
@@ -314,10 +302,12 @@ void HTMLConverter::convertLinks(string& line)
                 }
             }
         }
+        
         retVal += line[i]; 
     }
     line = retVal; 
 }
+
 //--
 void HTMLConverter::separateCodeBlocks(string& s) {
     // for a visualization of what this pattern matches, see: regexr.com/8jdpk
