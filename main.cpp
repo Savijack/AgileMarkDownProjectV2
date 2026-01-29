@@ -1,11 +1,39 @@
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 #define CATCH_CONFIG_NO_POSIX_SIGNALS
-#define CATCH_CONFIG_MAIN   
+#define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
 #include "HTMLConverter.h"
 
 using namespace std;
+
+int main(int argc, char *argv[]) {
+    Catch::Session session;
+    session.run(argc, argv);
+
+    string inputPath;
+    string outputPath;
+
+    cout << "Enter input markdown filepath: ";
+    if (!getline(cin, inputPath)) {
+        return 1;
+    }
+
+    if (!filesystem::exists(inputPath)) {
+        cerr << "Input file does not exist: " << inputPath << "\n";
+        return 1;
+    }
+
+    cout << "Enter output html filepath: ";
+    if (!getline(cin, outputPath)) {
+        return 1;
+    }
+
+    HTMLConverter converter(inputPath);
+    converter.convert(outputPath);
+    cout << "Converted to " << outputPath << "\n";
+    return 0;
+}
 
 //--
 TEST_CASE("Check creating output file")  
