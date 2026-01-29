@@ -81,9 +81,10 @@ Markdown is a markup language that is designed to add formatting elements to a t
 
 1. Prepare a document in MarkDown (.md) form that you wish to transform into HTML.
 2. Open main.cpp.
-3. Place the filepath of this document into the HTMLConverter constructor in main.cpp.
-4. Open the run and debug tab.
-5. Click the run button.
+3. Open the run and debug tab.
+4. Click the run button.
+5. Place the input filepath of your Markdown document into the terminal and press enter.
+6. Place the output filepath of the HTML file you wish to create and press enter.
 
 ## Examples
 
