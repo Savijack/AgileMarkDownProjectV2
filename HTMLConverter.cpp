@@ -33,6 +33,7 @@ void HTMLConverter::convert(const string& outputFilepath)
     convertBoldAndItalics(markdownContent);
     convertParagraphs(markdownContent);
     convertImagesAndLinks(markdownContent); 
+    convertMiniCodeblocks(markdownContent);
 
     for (auto& cb : codeblocks) {
         processCodeblock(cb);
@@ -133,6 +134,15 @@ void HTMLConverter::outputToFile(const string& filepath) {
         color: #8bb8ff;
         border-radius: 3px;
         padding: 0 2px;
+    }
+    code {
+        background: #2a2a2a;
+        color: #e06c75;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.9em;
+        border: 1px solid #444;
     }
     )";
     outputFile << "</style>\n</head>\n<body>\n";
@@ -354,8 +364,9 @@ static string htmlEscape(const string& s) {
     }
     return out;
 }
+//--
 // helper for processCodeblocks(), parses headers with highlight="x-y, z" syntax, and variants
-void parseHeader(const string& header, size_t& startRange, size_t& endRange, size_t& lineHighlight) {
+static void parseHeader(const string& header, size_t& startRange, size_t& endRange, size_t& lineHighlight) {
     smatch m;
     static const regex range(R"(highlight=\"(\d{1,3})\-(\d{1,3})\")");
     static const regex range_and_specific_line(R"(highlight=\"(\d{1,3})\-(\d{1,3}),\s*(\d{1,3})\")");
@@ -382,6 +393,7 @@ void parseHeader(const string& header, size_t& startRange, size_t& endRange, siz
         lineHighlight = -1;
     }
 }
+//--
 void HTMLConverter::processCodeblock(string& cb) {
     
     if (cb.find("program-output") != string::npos) {
@@ -417,7 +429,7 @@ void HTMLConverter::processCodeblock(string& cb) {
     size_t startRange; size_t endRange; size_t lineHighlight;
     parseHeader(header, startRange, endRange, lineHighlight);
 
-    // flag each line that needs to be highlighted
+    // flag each line that needs to be highlighted according to highlight="x-y,z" syntax
     vector<bool> highlight(lines.size(), false);
     for (size_t i = 0; i < highlight.size(); i++) {
         if (i >= startRange - 1 and i <= endRange - 1 and startRange > 0) {
@@ -483,7 +495,12 @@ void HTMLConverter::processCodeblock(string& cb) {
         cb = code_html;
     }
 }
-
+//--
+void HTMLConverter::convertMiniCodeblocks(string& s) {
+    static const regex pattern(R"(`([^`\n]+)`)");
+    s = regex_replace(s, pattern, "<code>$1</code>");
+}
+//--
 void HTMLConverter::convertLists(string& text)
 {
     string result;
