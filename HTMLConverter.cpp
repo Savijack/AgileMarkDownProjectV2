@@ -66,7 +66,6 @@ void HTMLConverter::outputToFile(const string& filepath) {
         overflow: hidden;
         background: #1e1e1e;
     }
-
     figure.codeblock > figcaption.codeblock__title {
         background: #2a2a2a;
         color: #ddd;
@@ -76,14 +75,12 @@ void HTMLConverter::outputToFile(const string& filepath) {
         text-align: center;
         border-bottom: 1px solid #444;
     }
-
     pre.codeblock {
         margin: 0;
-        padding: 0.75em 0;
+        padding: 0.5em 0;
         overflow-x: auto;
         counter-reset: line;
     }
-
     pre.codeblock > code {
         display: block;
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -91,14 +88,13 @@ void HTMLConverter::outputToFile(const string& filepath) {
         line-height: 1;
         color: #eee;
     }
-
     pre.codeblock .line {
         display: block;
         position: relative;
-        padding: 0 1em 0 4.25em;
+        padding: 0.1em 0.1em 0.1em 4.25em;
         white-space: pre;
+        line-height: 1;
     }
-
     pre.codeblock .line::before {
         counter-increment: line;
         content: counter(line);
@@ -110,28 +106,33 @@ void HTMLConverter::outputToFile(const string& filepath) {
         color: #888;
         user-select: none;
     }
-
     pre.codeblock .line.highlight {
         background: rgba(255, 255, 0, 0.12);
+        padding-top: 0.1em;
+        padding-bottom: 0.1em;
+        margin-top: -0.1em;
+        margin-bottom: -0.1em;
     }
-
     pre.codeblock .line.highlight::before {
         color: #ffd76a;
     }
-
     pre.codeblock ::selection {
         background: rgba(120, 160, 255, 0.25);
     }
     figure.codeblock.program-output pre.codeblock {
         padding: 0.75em 1em;
     }
-
     figure.codeblock.program-output pre.codeblock > code {
         padding: 0;
     }
-
     figure.codeblock.program-output pre.codeblock {
         line-height: 1.25;
+    }
+    pre.codeblock mark.partial-highlight {
+        background: rgba(100, 150, 255, 0.3);
+        color: #8bb8ff;
+        border-radius: 3px;
+        padding: 0 2px;
     }
     )";
     outputFile << "</style>\n</head>\n<body>\n";
@@ -353,7 +354,34 @@ static string htmlEscape(const string& s) {
     }
     return out;
 }
+// helper for processCodeblocks(), parses headers with highlight="x-y, z" syntax, and variants
+void parseHeader(const string& header, size_t& startRange, size_t& endRange, size_t& lineHighlight) {
+    smatch m;
+    static const regex range(R"(highlight=\"(\d{1,3})\-(\d{1,3})\")");
+    static const regex range_and_specific_line(R"(highlight=\"(\d{1,3})\-(\d{1,3}),\s*(\d{1,3})\")");
+    static const regex specific_line(R"(highlight=\"(\d{1,3})\")");
 
+    if (regex_search(header, m, range_and_specific_line)) {
+        startRange = stoi(m[1]);
+        endRange = stoi(m[2]);
+        lineHighlight = stoi(m[3]);
+    }
+    else if (regex_search(header, m, range)) {
+        startRange = stoi(m[1]);
+        endRange = stoi(m[2]);
+        lineHighlight = -1;
+    }
+    else if (regex_search(header, m, specific_line)) {
+        lineHighlight = stoi(m[1]);
+        startRange = -1;
+        endRange = -1;
+    }
+    else {
+        startRange = -1;
+        endRange = -1;
+        lineHighlight = -1;
+    }
+}
 void HTMLConverter::processCodeblock(string& cb) {
     
     if (cb.find("program-output") != string::npos) {
@@ -386,64 +414,57 @@ void HTMLConverter::processCodeblock(string& cb) {
         lines.push_back(line);
     }
 
-    // highlight flags (one per line)
+    size_t startRange; size_t endRange; size_t lineHighlight;
+    parseHeader(header, startRange, endRange, lineHighlight);
+
+    // flag each line that needs to be highlighted
     vector<bool> highlight(lines.size(), false);
-
-    // handles [< ... >] whole-line syntax ----
-    for (size_t i = 0; i < lines.size(); ++i) {
-        string& raw = lines[i];
-        if (raw.size() >= 4 and
-            raw.rfind("[<", 0) == 0 and
-            raw.substr(raw.size() - 2) == ">]") {
-
+    for (size_t i = 0; i < highlight.size(); i++) {
+        if (i >= startRange - 1 and i <= endRange - 1 and startRange > 0) {
             highlight[i] = true;
-            raw = raw.substr(2, raw.size() - 4); // strip [< and >]
         }
-    }
-
-    // handles highlight="3-5,8" header syntax
-    static const regex highlight_pattern(R"(highlight=\"(.*?)\")");
-    smatch hm;
-    if (regex_search(header, hm, highlight_pattern)) {
-        string spec = hm[1].str();
-        string token;
-        stringstream hs(spec);
-
-        while (getline(hs, token, ',')) {
-            size_t dash = token.find('-');
-            if (dash == string::npos) {
-                int n = stoi(token);
-                if (n >= 1 and (size_t)n <= lines.size()) {
-                    highlight[n - 1] = true;
-                }
-            } 
-            else {
-                int a = stoi(token.substr(0, dash));
-                int b = stoi(token.substr(dash + 1));
-                if (a > b) {
-                    swap(a, b);
-                }
-                for (int n = a; n <= b; ++n) {
-                    if (n >= 1 and static_cast<size_t>(n) <= lines.size()) {
-                        highlight[n - 1] = true;
-                    }
-                }
-            }
+        if (i == lineHighlight - 1 and lineHighlight > 0) {
+            highlight[i] = true;
         }
     }
 
     string code_html;
     code_html += "<pre class=\"codeblock\"><code>\n";
 
+    static const regex secondary_highlight(R"(\[<(.*?)>\])");
+    
     for (size_t i = 0; i < lines.size(); ++i) {
         string classes = "line";
         if (highlight[i]) {
             classes += " highlight";
         }
 
+        string processedLine = lines[i];
+        string result;
+        smatch match;
+        
+        while (regex_search(processedLine, match, secondary_highlight)) {
+            // Add text before the match (escape it)
+            result += htmlEscape(match.prefix().str());
+            
+            // Add highlighted portion with mark tags (escape the content)
+            result += "<mark class=\"partial-highlight\">" + htmlEscape(match[1].str()) + "</mark>";
+            
+            // Update processedLine to continue searching
+            processedLine = match.suffix().str();
+        }
+        
+        // Add remaining text (escape it)
+        result += htmlEscape(processedLine);
+        
+        // If the line is empty, add a zero-width space to ensure proper line height
+        if (result.empty()) {
+            result = "&#8203;"; // zero-width space
+        }
+        
         code_html += "<span class=\"" + classes + "\">"
-                   + htmlEscape(lines[i]) +
-                   "</span>\n";
+                + result +
+                "</span>\n";
     }
 
     code_html += "</code></pre>\n";

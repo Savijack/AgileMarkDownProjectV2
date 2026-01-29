@@ -4,6 +4,7 @@
 #include <fstream>
 #include <regex>
 #include <sstream>
+#include <cassert>
 using namespace std;
 
 class HTMLConverter {
