@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+
+    figure.codeblock {
+        margin: 1.5em 0;
+        border: 1px solid #444;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #1e1e1e;
+    }
+    figure.codeblock > figcaption.codeblock__title {
+        background: #2a2a2a;
+        color: #ddd;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.9em;
+        padding: 0.5em 0.75em;
+        text-align: center;
+        border-bottom: 1px solid #444;
+    }
+    pre.codeblock {
+        margin: 0;
+        padding: 0.5em 0;
+        overflow-x: auto;
+        counter-reset: line;
+    }
+    pre.codeblock > code {
+        display: block;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.95em;
+        line-height: 1;
+        color: #eee;
+    }
+    pre.codeblock .line {
+        display: block;
+        position: relative;
+        padding: 0.1em 0.1em 0.1em 4.25em;
+        white-space: pre;
+        line-height: 1;
+    }
+    pre.codeblock .line::before {
+        counter-increment: line;
+        content: counter(line);
+        position: absolute;
+        left: 0;
+        width: 3.25em;
+        padding-right: 0.75em;
+        text-align: right;
+        color: #888;
+        user-select: none;
+    }
+    pre.codeblock .line.highlight {
+        background: rgba(255, 255, 0, 0.12);
+        padding-top: 0.1em;
+        padding-bottom: 0.1em;
+        margin-top: -0.1em;
+        margin-bottom: -0.1em;
+    }
+    pre.codeblock .line.highlight::before {
+        color: #ffd76a;
+    }
+    pre.codeblock ::selection {
+        background: rgba(120, 160, 255, 0.25);
+    }
+    figure.codeblock.program-output pre.codeblock {
+        padding: 0.75em 1em;
+    }
+    figure.codeblock.program-output pre.codeblock > code {
+        padding: 0;
+    }
+    figure.codeblock.program-output pre.codeblock {
+        line-height: 1.25;
+    }
+    pre.codeblock mark.partial-highlight {
+        background: rgba(100, 150, 255, 0.3);
+        color: #8bb8ff;
+        border-radius: 3px;
+        padding: 0 2px;
+    }
+    code {
+        background: #2a2a2a;
+        color: #e06c75;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.9em;
+        border: 1px solid #444;
+    }
+    </style>
+</head>
+<body>
+<p><h1>Assignment 1: Acceptance Test</h1></p><p><h2>Overview</h2>
+This document outlines the acceptance test for the project. The purpose of this test is to ensure that the developed system meets the specified requirements and functions as intended. I am will use this file to demonstrate that the system behaves correctly under various scenarios.
+<hr>
+<h3>Lorem Ipsum Section</h3>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pretium dui ac purus tincidunt suscipit. Maecenas congue porta lectus in bibendum. Morbi nec lacus dolor. Etiam porttitor libero vel ornare maximus. Nunc viverra libero in rutrum pellentesque. Duis orci erat, varius mattis turpis ut, rhoncus pretium turpis. Etiam mattis leo nec leo semper lacinia.</p><p>Integer at ex at erat aliquam rutrum. Sed facilisis lorem sed pulvinar dapibus. Suspendisse commodo feugiat purus, vel tincidunt dolor euismod vel. Nam nec ipsum ac ex auctor pellentesque. Vivamus vel odio dui. Etiam aliquet velit eget justo tempus suscipit sed et sem. Sed non orci turpis. Proin et eros porta, elementum eros at, facilisis eros. Nulla eu porttitor nisl. Donec sit amet vehicula odio, at lacinia lacus. Curabitur eget magna auctor, cursus quam semper, tempor neque. Maecenas rutrum consequat pretium. Morbi fringilla ex eu nunc rhoncus, quis placerat tortor luctus.</p><p>Aliquam sed nisi ultrices, faucibus tortor vel, blandit purus. Integer dignissim velit sit amet purus convallis, fringilla facilisis augue tristique. Nulla facilisi. Nulla at consequat odio. Donec odio mi, consectetur mattis condimentum ac, suscipit nec purus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Praesent tempor fermentum accumsan. In tristique tincidunt est, a tincidunt sapien sollicitudin sit amet. Nam hendrerit commodo diam eget gravida. Donec vestibulum sodales purus scelerisque malesuada. Praesent ornare enim eu euismod tincidunt. Aliquam viverra nibh pulvinar mauris vulputate, quis commodo felis efficitur.</p><p><h2>Some Emphasized Text</h2>
+Here is some text with <b>bold</b> and <em>italic</em> formatting to demonstrate emphasis in the document. Here is a simple code snippet <code>int x;</code> to illustrate inline code formatting. You can find my GitHub account here: <a href="https://github.com/markm208">markm208</a> and a picture of me here: <img src="https://avatars.githubusercontent.com/u/934916?v=4" alt="Me"></p><p><h2>Code Block Example</h2>
+Below is an example of a code block demonstrating a simple function in C/C++. I'll discuss:
+<ol>
+  <li>printing to the console</li>
+  <li>flow of control</li>
+  <li>the main function</li>
+</ol></p><p><figure class="codeblock">
+<figcaption class="codeblock__title">main.cpp</figcaption>
+<pre class="codeblock"><code>
+<span class="line">#include &lt;iostream&gt;</span>
+<span class="line">using namespace std;</span>
+<span class="line">&#8203;</span>
+<span class="line">int main()</span>
+<span class="line">{</span>
+<span class="line">    cout &lt;&lt; &quot;Hello World!!!!&quot; &lt;&lt; endl;</span>
+<span class="line">&#8203;</span>
+<span class="line">    return 0;</span>
+<span class="line">}</span>
+</code></pre>
+</figure>
+</p><p>In order to print to the console window one needs to include the iostream library and use the standard namespace. </p><p><figure class="codeblock">
+<figcaption class="codeblock__title">main.cpp</figcaption>
+<pre class="codeblock"><code>
+<span class="line">#include &lt;iostream&gt;</span>
+<span class="line">using namespace std;</span>
+<span class="line">&#8203;</span>
+<span class="line">int main()</span>
+<span class="line">{</span>
+<span class="line">    cout &lt;&lt; &quot;Hello World!!!!&quot; &lt;&lt; endl;</span>
+<span class="line">&#8203;</span>
+<span class="line">    return 0;</span>
+<span class="line">}</span>
+</code></pre>
+</figure>
+</p><p>The main function is the entry point of the program, and it returns an integer value upon completion.</p><p><figure class="codeblock">
+<figcaption class="codeblock__title">main.cpp</figcaption>
+<pre class="codeblock"><code>
+<span class="line">#include &lt;iostream&gt;</span>
+<span class="line">using namespace std;</span>
+<span class="line">&#8203;</span>
+<span class="line highlight">int <mark class="partial-highlight">main()</mark></span>
+<span class="line highlight">{</span>
+<span class="line highlight">    cout &lt;&lt; &quot;Hello World!!!!&quot; &lt;&lt; endl;</span>
+<span class="line highlight">&#8203;</span>
+<span class="line highlight">    return 0;</span>
+<span class="line highlight">}</span>
+</code></pre>
+</figure>
+</p><p><code>cout</code> is used to print text to the console. The <code><<</code> operator is used to send the string "Hello World!!!!" followed by an newline to the output stream.</p><p><figure class="codeblock">
+<figcaption class="codeblock__title">main.cpp</figcaption>
+<pre class="codeblock"><code>
+<span class="line">#include &lt;iostream&gt;</span>
+<span class="line">using namespace std;</span>
+<span class="line">&#8203;</span>
+<span class="line">int main()</span>
+<span class="line">{</span>
+<span class="line highlight">    <mark class="partial-highlight">cout &lt;&lt; &quot;Hello World!!!!&quot; &lt;&lt; endl;</mark></span>
+<span class="line">&#8203;</span>
+<span class="line">    return 0;</span>
+<span class="line">}</span>
+</code></pre>
+</figure>
+ </p><p><code>main</code> returns 0 to indicate that the program has completed successfully.</p><p><figure class="codeblock">
+<figcaption class="codeblock__title">main.cpp</figcaption>
+<pre class="codeblock"><code>
+<span class="line">#include &lt;iostream&gt;</span>
+<span class="line">using namespace std;</span>
+<span class="line">&#8203;</span>
+<span class="line">int main()</span>
+<span class="line">{</span>
+<span class="line">    cout &lt;&lt; &quot;Hello World!!!!&quot; &lt;&lt; endl;</span>
+<span class="line">&#8203;</span>
+<span class="line highlight">    <mark class="partial-highlight">return 0;</mark></span>
+<span class="line">}</span>
+</code></pre>
+</figure>
+</p><p>The output of the following program will be:
+<figure class="codeblock program-output">
+<figcaption class="codeblock__title">Program Output</figcaption>
+<pre class="codeblock"><code>
+Hello World!!!!
+
+</code></pre>
+</figure>
+</p><p>If I repeated the <code>cout</code> a few times like this:</p><p><figure class="codeblock">
+<figcaption class="codeblock__title">main.cpp</figcaption>
+<pre class="codeblock"><code>
+<span class="line">#include &lt;iostream&gt;</span>
+<span class="line">using namespace std;</span>
+<span class="line">&#8203;</span>
+<span class="line">int main()</span>
+<span class="line">{</span>
+<span class="line highlight">    <mark class="partial-highlight">cout</mark> &lt;&lt; &quot;Hello World!!!!&quot; &lt;&lt; <mark class="partial-highlight">endl;</mark></span>
+<span class="line highlight">    <mark class="partial-highlight">cout</mark> &lt;&lt; &quot;Hello World!!!!&quot; &lt;&lt; <mark class="partial-highlight">endl;</mark></span>
+<span class="line highlight">    <mark class="partial-highlight">cout</mark> &lt;&lt; &quot;Hello World!!!!&quot; &lt;&lt; <mark class="partial-highlight">endl;</mark></span>
+<span class="line">&#8203;</span>
+<span class="line">    return 0;</span>
+<span class="line">}</span>
+</code></pre>
+</figure>
+ </p><p>Then the output would be:</p><p><figure class="codeblock program-output">
+<figcaption class="codeblock__title">Program Output</figcaption>
+<pre class="codeblock"><code>
+Hello World!!!!
+Hello World!!!!
+Hello World!!!!
+
+</code></pre>
+</figure>
+</p><p><h3>Status Table</h3>
+<table>
+  <thead>
+    <tr>
+      <th><em>Feature</em></th>
+      <th>Not Started</th>
+      <th>Doing</th>
+      <th>Done</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Basic Markdown</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>Extended Code Markdown</td>
+      <td>✗</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>Table Markdown</td>
+      <td>✗</td>
+      <td>✗</td>
+      <td>✓</td>
+    </tr>
+  </tbody>
+</table>
+</p></body></html>

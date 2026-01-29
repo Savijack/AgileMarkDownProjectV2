@@ -10,7 +10,7 @@ using namespace std;
 //--
 TEST_CASE("Check creating output file")  
 {
-	HTMLConverter *test = new HTMLConverter("./test_documents/4.md");
+	HTMLConverter *test = new HTMLConverter("./test_documents/6.md");
 	SECTION("Test Document 1")
 	{
 		test->convert("output.html");
@@ -21,6 +21,17 @@ TEST_CASE("Check creating output file")
 	{
 		REQUIRE(10 == 10);
 	}
+	delete test;
+}
+TEST_CASE("Check creating output file2")  
+{
+	HTMLConverter *test = new HTMLConverter("./test_documents/acceptanceTest.md");
+	SECTION("Test Document 2")
+	{
+		test->convert("output2.html");
+		REQUIRE(filesystem::exists("./output2.html"));
+	}
+
 	delete test;
 }
 
@@ -374,6 +385,184 @@ TEST_CASE("convert paragraph function")
         string s = "\n\nthis is paragraph one.\n\nthis is paragraph two.";
         test->convertParagraphs(s);
         REQUIRE(s == "<p>this is paragraph one.</p><p>this is paragraph two.</p>");
+    }
+    delete test;
+}
+TEST_CASE("processCodeblock function")
+{
+    HTMLConverter *test = new HTMLConverter("./test_documents/1.md");
+    
+    SECTION("Simple codeblock with no metadata")
+    {
+        string cb = "```\nint x = 5;\nreturn x;\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<pre class=\"codeblock\">") != string::npos);
+        REQUIRE(cb.find("<span class=\"line\">int x = 5;</span>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line\">return x;</span>") != string::npos);
+    }
+    
+    SECTION("Codeblock with filename")
+    {
+        string cb = "``` file=\"test.cpp\"\nint main() {}\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<figure class=\"codeblock\">") != string::npos);
+        REQUIRE(cb.find("<figcaption class=\"codeblock__title\">test.cpp</figcaption>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line\">int main() {}</span>") != string::npos);
+    }
+    
+    SECTION("Codeblock with single line highlight")
+    {
+        string cb = "``` highlight=\"2\"\nline 1\nline 2\nline 3\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<span class=\"line\">line 1</span>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line highlight\">line 2</span>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line\">line 3</span>") != string::npos);
+    }
+    
+    SECTION("Codeblock with range highlight")
+    {
+        string cb = "``` highlight=\"2-4\"\nline 1\nline 2\nline 3\nline 4\nline 5\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<span class=\"line\">line 1</span>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line highlight\">line 2</span>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line highlight\">line 3</span>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line highlight\">line 4</span>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line\">line 5</span>") != string::npos);
+    }
+    
+    SECTION("Codeblock with range and specific line highlight")
+    {
+        string cb = "``` highlight=\"2-3, 5\"\nline 1\nline 2\nline 3\nline 4\nline 5\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<span class=\"line\">line 1</span>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line highlight\">line 2</span>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line highlight\">line 3</span>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line\">line 4</span>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line highlight\">line 5</span>") != string::npos);
+    }
+    
+    SECTION("Codeblock with partial highlight")
+    {
+        string cb = "```\nint [<x>] = 5;\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<mark class=\"partial-highlight\">x</mark>") != string::npos);
+        REQUIRE(cb.find("int ") != string::npos);
+        REQUIRE(cb.find(" = 5;") != string::npos);
+    }
+    
+    SECTION("Codeblock with multiple partial highlights on same line")
+    {
+        string cb = "```\n[<cout>] << \"Hello\" << [<endl>];\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<mark class=\"partial-highlight\">cout</mark>") != string::npos);
+        REQUIRE(cb.find("<mark class=\"partial-highlight\">endl</mark>") != string::npos);
+    }
+    
+    SECTION("Codeblock with HTML special characters")
+    {
+        string cb = "```\nif (x < 5 && y > 3) {}\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("&lt;") != string::npos);
+        REQUIRE(cb.find("&gt;") != string::npos);
+        REQUIRE(cb.find("&amp;") != string::npos);
+    }
+    
+    SECTION("Program output codeblock")
+    {
+        string cb = "```program-output\nHello World\nOutput line 2\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<figure class=\"codeblock program-output\">") != string::npos);
+        REQUIRE(cb.find("<figcaption class=\"codeblock__title\">Program Output</figcaption>") != string::npos);
+        REQUIRE(cb.find("Hello World") != string::npos);
+        REQUIRE(cb.find("Output line 2") != string::npos);
+    }
+    
+    SECTION("Codeblock with filename and highlight")
+    {
+        string cb = "``` file=\"main.cpp\" highlight=\"1\"\nint main() {}\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<figcaption class=\"codeblock__title\">main.cpp</figcaption>") != string::npos);
+        REQUIRE(cb.find("<span class=\"line highlight\">int main() {}</span>") != string::npos);
+    }
+    
+    SECTION("Empty codeblock")
+    {
+        string cb = "```\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<pre class=\"codeblock\">") != string::npos);
+    }
+    
+    SECTION("Malformed codeblock - no closing backticks")
+    {
+        string cb = "```\nint x = 5;";
+        test->processCodeblock(cb);
+        // Should still process, just won't have closing ``` to remove
+        REQUIRE(cb.find("<span class=\"line\">int x = 5;</span>") != string::npos);
+    }
+    
+    SECTION("Malformed codeblock - no newline after opening")
+    {
+        string cb = "```";
+        test->processCodeblock(cb);
+        // Should clear the codeblock due to bad format
+        REQUIRE(cb == "");
+    }
+    SECTION("Program output codeblock")
+    {
+        string cb = "```program-output\nHello World\nOutput line 2\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<figure class=\"codeblock program-output\">") != string::npos);
+        REQUIRE(cb.find("<figcaption class=\"codeblock__title\">Program Output</figcaption>") != string::npos);
+        REQUIRE(cb.find("Hello World") != string::npos);
+        REQUIRE(cb.find("Output line 2") != string::npos);
+    }
+
+    SECTION("Program output with special characters")
+    {
+        string cb = "```program-output\nValue: x < 5 && y > 3\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<figure class=\"codeblock program-output\">") != string::npos);
+        REQUIRE(cb.find("&lt;") != string::npos);
+        REQUIRE(cb.find("&gt;") != string::npos);
+        REQUIRE(cb.find("&amp;") != string::npos);
+    }
+
+    SECTION("Program output with empty output")
+    {
+        string cb = "```program-output\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<figure class=\"codeblock program-output\">") != string::npos);
+        REQUIRE(cb.find("<figcaption class=\"codeblock__title\">Program Output</figcaption>") != string::npos);
+    }
+
+    SECTION("Program output with multiple lines")
+    {
+        string cb = "```program-output\nLine 1\nLine 2\nLine 3\nLine 4\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<figure class=\"codeblock program-output\">") != string::npos);
+        REQUIRE(cb.find("Line 1") != string::npos);
+        REQUIRE(cb.find("Line 2") != string::npos);
+        REQUIRE(cb.find("Line 3") != string::npos);
+        REQUIRE(cb.find("Line 4") != string::npos);
+        // Verify it doesn't have line numbers (program output shouldn't)
+        REQUIRE(cb.find("class=\"line\"") == string::npos);
+    }
+
+    SECTION("Program output preserves whitespace")
+    {
+        string cb = "```program-output\n    Indented output\n        More indented\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<figure class=\"codeblock program-output\">") != string::npos);
+        REQUIRE(cb.find("Indented output") != string::npos);
+        REQUIRE(cb.find("More indented") != string::npos);
+    }
+
+    SECTION("Program output with quotes")
+    {
+        string cb = "```program-output\nShe said \"Hello World\"\n```";
+        test->processCodeblock(cb);
+        REQUIRE(cb.find("<figure class=\"codeblock program-output\">") != string::npos);
+        REQUIRE(cb.find("&quot;") != string::npos);
     }
     delete test;
 }

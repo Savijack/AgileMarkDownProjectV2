@@ -4,6 +4,7 @@
 #include <fstream>
 #include <regex>
 #include <sstream>
+#include <cassert>
 using namespace std;
 
 class HTMLConverter {
@@ -18,6 +19,7 @@ public:
    void restoreCodeBlocks(string& s);
    void processCodeblock(string& cb);
    void handleProgramOutput(string& cb);
+   void convertMiniCodeblocks(string& s);
    
    void convertLine(string& s);
    void convertHeaders(string& s);
